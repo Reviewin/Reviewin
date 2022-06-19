@@ -1,0 +1,147 @@
+MDScreen:
+    name:"register"
+    MDFloatLayout:
+        md_bg_color: 41/255, 34/255, 34/255, 1
+        MDLabel:
+            text: "Happy to see you here !"
+            text_color: 1,1,1,1
+            pos_hint: {'center_x':0.55, 'center_y':0.95}
+            halign: 'center'
+            theme_text_color: 'Custom'
+            font_size: "24sp"
+            font_name: "Inter"
+        MDLabel:
+            text: "Before beggining, just create an account..."
+            text_color: 1,1,1,1
+            pos_hint: {'center_x':0.5, 'center_y':0.90}
+            halign: 'center'
+            theme_text_color:'Custom'
+            font_size: "16sp"
+            font_name: "Inter"
+        MDLabel:
+            text: "We are waiting for you..."
+            text_color: 1,1,1,1
+            pos_hint: {'center_x':0.5, 'center_y':0.85}
+            halign: 'center'
+            theme_text_color: 'Custom'
+            font_size: "18sp"
+            font_name: "Inter"
+        MDLabel:
+            text: "Register"
+            text_color: 1,1,1,1
+            pos_hint: {'center_x':0.5, 'center_y':0.8}
+            halign: 'center'
+            theme_text_color: 'Custom'
+            font_size: "24sp"
+            font_name:"OpenSans"
+        MDLabel:
+            text:"or"
+            text_color: 1,1,1,1
+            pos_hint: {'center_x':0.44, 'center_y':0.77}
+            halign: 'center'
+            theme_text_color: 'Custom'
+            font_name: "OpenSans"
+            font_size: "18sp"
+        Button:
+            text: "[u]login[/u]"
+            markup: True
+            font_size: "20sp"
+            font_name: "OpenSans"
+            pos_hint: {'center_x': 0.55, 'center_y': 0.77}
+            halign: 'center'
+            theme_text_color: 'Custom'
+            text_color: 1,1,1,1
+            color: 11/255, 206/255, 232/255, 1
+            size_hint: (0.15, 0.015)
+            background_color: 41/255, 34/255, 34/255, 1
+            background_normal: ''
+            on_press: app.root.current = "login"
+        MDTextFieldRound:
+            id:full_name
+            text: ""
+            hint_text: "Full Name"
+            size_hint_x:  None
+            size_hint_y: 0.08
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.7}
+        MDTextFieldRound:
+            icon_right: "email"
+            id: e_mail
+            hint_text: "E-Mail"
+            size_hint_x:  None
+            size_hint_y: 0.08
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.6}
+        MDTextFieldRound:
+            id: address
+            hint_text: "Address"
+            size_hint_x: None
+            size_hint_y: 0.08
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.5}
+        MDTextFieldRound:
+            id: age
+            hint_text: "Age"
+            size_hint_x: None
+            size_hint_y: 0.08
+            input_filter: 'int'
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.4}
+        MDTextFieldRound:
+            icon_left: 'key-variant'
+            icon_right: 'eye-off'
+            id: password
+            hint_text: "Password"
+            size_hint_x: None
+            size_hint_y: 0.08
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.3}
+        MDTextFieldRound:
+            id: gender
+            hint_text: "MALE OR FEMALE"
+            size_hint_x: None
+            size_hint_y: 0.08
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.2}
+        MDFillRoundFlatButton:
+            text: "Finish !"
+            font_size: "20sp"
+            font_name: "OpenSans"
+            pos_hint: {'center_x':0.5, 'center_y':0.1}
+            halign: 'center'
+            theme_text_color:'Custom'
+            text_color: 255/255, 255/255, 255/255, 1
+            size_hint: (0.58, 0.06)
+            md_bg_color: 62/255, 216/255, 133/255, 1
+            background_normal:''
+            on_press: app.check_register(full_name.text), app.check_register_e_mail(e_mail.text), app.check_register_address(address.text), app.check_register_password(password.text)
+        Button:
+            pos_hint: {'center_x':0.05, 'center_y':0.95}
+            size_hint: (0.2, 0.02)
+            font_size: 15
+            background_color: 41/255, 34/255, 34/255, 1
+            background_normal: ''
+            on_press: app.root.current = "accueil"
+            Image:
+                source: "back2.png"
+                center_x: self.parent.center_x
+                center_y: self.parent.center_y
+
+
+            
+
+
+
+
+
+
+
+
+
+            
