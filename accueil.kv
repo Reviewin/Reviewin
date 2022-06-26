@@ -1,0 +1,105 @@
+MDScreen:
+    name: "accueil"
+    MDFloatLayout:
+        md_bg_color: 41/255, 34/255, 34/255, 1
+        spacing: "20sp"
+        MDToolbar:
+            left_action_items: [["menu", lambda x: app.callback()]]
+            pos_hint: {'center_x':0.5, 'center_y':0.95}
+            md_bg_color: 41/255, 34/255, 34/255, 1  
+        MDLabel:
+            text: "Welcome ! "
+            pos_hint: {'center_x': 0.25, 'center_y': 0.85}
+            theme_text_color: 'Custom'
+            text_color: 1,1,1,1
+            font_size: "24sp"
+            font_name: "Popp"
+            halign: 'center'
+        MDLabel:
+            text: "Before starting reviewing our suggestions,You need to read and accept our "
+            pos_hint: {'center_x':0.53,'center_y':0.75}
+            theme_text_color: 'Custom'
+            text_color: 1,1,1,1
+            font_size: "20sp"
+            font_name: "Inter"
+        Button:
+            text: "[u]privacy policy.[/u]"
+            markup: True
+            font_size: "20sp"
+            font_name: "Popp"
+            pos_hint: {'center_x': 0.55, 'center_y': 0.718}
+            halign: 'center'
+            theme_text_color: 'Custom'
+            text_color: 1,1,1,1
+            color: 62/255, 216/255, 133/255, 1
+            size_hint: (0.4, 0.02)
+            background_color: 41/255, 34/255, 34/255, 1
+            background_normal: ''
+            on_press: app.root.current = 'condition'
+        MDFillRoundFlatButton:
+            text: "Accept"
+            font_size: "15sp"
+            font_name: "Popp"
+            pos_hint: {'center_x':0.5, 'center_y':0.6}
+            theme_text_color:'Custom'
+            text_color: 255/255, 255/255, 255/255, 1
+            size_hint: (0.58, 0.06)
+            md_bg_color: 62/255, 216/255, 133/255, 1
+            background_normal:''
+            radius: [20]
+            on_press: app.root.current = "register"
+        MDLabel:
+            text: "And remember, the most important thing between us and you, is the confidence..."
+            font_size: "20sp"
+            font_name: "Inter"
+            pos_hint: {'center_x':0.53, 'center_y':0.45}
+            halign: 'left'
+            theme_text_color: 'Custom'
+            text_color: 1,1,1,1
+        MDLabel:
+            text:"You're a user and want to get any informations about the application ?"
+            font_size: "20sp"
+            font_name: "Inter"
+            pos_hint:{'center_x':0.53,'center_y':0.35}
+            halign:'left'
+            theme_text_color: 'Custom'
+            text_color: 1,1,1,1
+        MDFillRoundFlatButton:
+            text: "Contact Us "
+            pos_hint: {'center_x':0.5, 'center_y':0.25}
+            font_size:"15sp"
+            font_name: "Popp"
+            halign: 'center'
+            theme_text_color: 'Custom'
+            text_color: 255/255, 255/255, 255/255, 1
+            size_hint: (0.58, 0.06)
+            md_bg_color: 11/255, 206/255, 232/255, 1
+            background_normal: ''
+            on_press: app.root.current  = "contacts"
+        Button:
+            text: "[u]F.A.Q[/u]"
+            markup: True
+            pos_hint:{'center_x': 0.9, 'center_y': 0.9}
+            font_size: "16sp"
+            font_name:"OpenSans"
+            halign: 'right'
+            theme_text_color:'Custom'
+            color: 255/255, 255/255, 255/255, 1
+            background_color: 41/255, 34/255, 34/255, 1
+            background_normal: ''
+            size_hint: (0.3, 0.03)
+            on_press: app.root.current = "faq"
+        Button:
+            text: "[u]Help[/u]"
+            markup: True
+            pos_hint: {'center_x':0.9, 'center_y':0.93}
+            font_size: "16sp"
+            font_name: 'OpenSans'
+            halign: 'right'
+            theme_text_color: 'Custom'
+            color: 255/255, 255/255, 255/255, 1
+            background_color: 41/255, 34/255, 34/255, 1
+            background_normal: ''
+            size_hint: (0.3, 0.04)
+            on_press: app.root.current = "help"
+        
