@@ -135,12 +135,12 @@ class ReviewinApp(MDApp):
         self.dialog.dismiss()
  
     def check_text(self):
-        screen = self.root.get_screen('register')
-        e_mail = screen.ids.e_mail.text
-        age = screen.ids.age.text
-        full_name = screen.ids.full_name.text
-        password = screen.ids.password.text
-        address = screen.ids.address.text
+        pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
+        e_mail = self.root.current_screen.ids.e_mail.text
+        age = int(self.root.current_screen.ids.age.text)
+        full_name = self.root.current_screen.ids.full_name.text
+        password = self.root.current_screen.ids.password.text
+        country = self.root.current_screen.ids.country.text
         if (not '@' and '.' in e_mail) and len(e_mail) < 6:
             toast("Please enter a valid e-mail.")
         else:
@@ -149,10 +149,10 @@ class ReviewinApp(MDApp):
             toast("Please enter yout full name.")
         else:
             return full_name
-        if not "@" or "#" or '&' or '-' or '_' or "+" and not "1" or "2" or "3" or "4" or "5" or "6" or "7" or "8" or "9" in password and len(password) < 8:
-            toast("Please read the conditions for a secure password.")
+        if re.search(e_mail, pattern):
+           return True
         else:
-            return password
+            toast("Please enter a valid e_mail")
         if len(password) < 8:
             toast("Please enter a valid password.")
         else:
@@ -169,6 +169,35 @@ class ReviewinApp(MDApp):
             toast("Please register correctly ! ")
         else:
             return something
+         
+     def create_user(self):
+        full_name = str(self.root.current_screen.ids.full_name.text)
+        gender = str(self.root.current_screen.ids.gender.text)
+        age = int(self.root.current_screen.ids.age.text)
+        country = self.root.current_screen.ids.country.text
+        e_mail = self.root.current_screen.ids.e_mail.text
+        try:
+            connection = httplib.HTTPSConnection('http://localhost:8000/')
+            connection.connect()
+            connection.request('POST', 'http://127.0.0.1/register/',json.dumps({"full_name":full_name,"e_mail":e_mail,"age":age,"gender":gender,"country":country})), {
+                "Content-type": "application/json"
+            }
+        except:
+            MDDialog(
+                title= "Error while trying to sign up. Please try gain",
+                theme_text_color= 'Custom',
+                font_name= "RSlab",
+                font_size= "15",
+                text_color= [1,1,1,1],
+                buttons= [
+                    MDFlatButton(
+                        text="[u]Try again.[/u]",
+                        theme_text_color="Custom",
+                        text_color=[1,1,1,1],
+                    ),
+
+                ]
+            )
 
 
 
