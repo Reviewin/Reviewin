@@ -1,4 +1,4 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI, Body 
 import uvicorn
 from typing import Union
 from pydantic import BaseModel
@@ -26,11 +26,12 @@ async def startup_event():
 
 
 
-@api.post('/register/') 
-async def register(User_register: info_user):
-    couch_database.save(info_user.dict())
-    return {"Status":"Done"}
-
+@api.post('/postuserinfo')
+def create_post(payload: dict = Body(...):
+    couch_server = couchdb.Server('http://admin:kolea21342@localhost:5984/')
+    couch_data = couch_server.create('db_this_user')
+    couch_data.save(payload)
+    return {"Status":"Done"}  
 
 
 if __name__ == '__main__':
