@@ -1,37 +1,31 @@
-from fastapi import FastAPI, Body 
+from fastapi import FastAPI 
 import uvicorn
 from typing import Union
 from pydantic import BaseModel
 from typing import Optional
 import couchdb
-from couchdb import Server
-
 
 api = FastAPI() #on instancie 
+
 
 class User_register(BaseModel):
     first_name: str
     last_name: str
     gender: str
-    age: int
-    address:str 
-    e_mail:  str
+    age: str
+    address: str
+    e_mail: str
 
 
 
-@api.on_event("/startup/")
-async def startup_event():
+
+@api.post('/users') 
+async def sign_up_user(info_user: User_register):
     couch_server = couchdb.Server("http://admin:kolea21342@localhost:5984/")
-    couch_database = couch_server.create('db_reviewin_real')
+    couch_db = couch_server.create("my_database_2")
+    couch_db.save(info_user.dict())
+    return {"Status":"Done"}
 
-
-
-@api.post('/postuserinfo')
-def create_post(payload: dict = Body(...):
-    couch_server = couchdb.Server('http://admin:kolea21342@localhost:5984/')
-    couch_data = couch_server.create('db_this_user')
-    couch_data.save(payload)
-    return {"Status":"Done"}  
 
 
 if __name__ == '__main__':
