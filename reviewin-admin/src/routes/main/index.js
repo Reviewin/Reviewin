@@ -1,5 +1,4 @@
-import { h } from 'preact';
-import { useState } from 'preact/hooks';
+import { Component, h } from 'preact';
 
 import Entrance from "../entrance";
 import ProductList from "../product-list";
@@ -11,8 +10,13 @@ import { BiChevronDown } from 'react-icons/bi';
 import { Router, route } from 'preact-router';
 //import { Link as MatchLink } from 'preact-router/match';
 
-const Main = () => {
-    function handleLogOut () {
+class Main extends Component {
+    constructor() {
+        super();
+        this.state = { session: {} }
+    }
+
+    handleLogOut() {
         //window.localStorage.removeItem("role")
         window.rvwnClient.logOut()
         .then(() => {
@@ -20,21 +24,22 @@ const Main = () => {
         })
     }
 
-    const [session, setSession] = useState({});
+    componentDidMount() {
+        window.rvwnClient.getSession()
+        .then((s) => {this.setState({session: s})})
+        .catch((err) => {
+            if (err) { alert(err) }
+            route("/login", true)
+        })
+    }
 
-    window.rvwnClient.getSession()
-    .then((s) => {setSession(s)})
-    .catch((err) => {
-        if (err) { alert(err) }
-        route("/login", true)
-    })
-
-    return (
+    render() {
+        return (
         <Flex direction="vertical">
             <Flex as="nav" w="100%" h="3em" position="fixed" lign="center" px="4" bg="yellow.100">
                 <HStack mr="auto">
                     <Heading as="h1" size="md">Reviewin</Heading>
-                    { session.user && session.user.role == "partner"  &&  (
+                    { this.state.session.user && this.state.session.user.role == "partner"  &&  (
                         <>
                             <Link href="/products/">Products</Link>
                             <Link href="/gifts/">Gifts</Link>
@@ -42,15 +47,15 @@ const Main = () => {
                     )}
                 </HStack>
                 <Flex ml="auto">
-                    { session.user ? (
+                    { this.state.session.user ? (
                         <Menu>
                             <MenuButton as={Button} variant="ghost" rightIcon={<Icon as={BiChevronDown} />}>
-                                {session.user.username}
+                                {this.state.session.user.displayName}
                             </MenuButton>
                             <MenuList>
                                 <MenuItem as={Link} href="/settings">Settings</MenuItem>
                                 <MenuDivider />
-                                <MenuItem onClick={handleLogOut}>Log out</MenuItem>
+                                <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
                             </MenuList>
                         </Menu>
                     ) : (
@@ -66,7 +71,8 @@ const Main = () => {
                 </Router>
             </Flex>
         </Flex>
-    )
+        )
+    }
 }
 
 export default Main;

@@ -1,38 +1,38 @@
-import { h } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { Component, h } from 'preact';
 
 import { Heading } from "@chakra-ui/react";
 
-const ProductList = () => {
-    const [ products, setProducts ] = useState([])
+class ProductList extends Component {
+    constructor() {
+        super();
+        this.state = {products: []}
+    }
 
-    useEffect(() => {
-        document.title = "Products - Reviewin"
-    })
-
-    useEffect(() => {
+    componentDidMount() {
+        document.title = "Products - Reviewin";
         window.rvwnClient.getUserProducts()
         .then((products) => {
-            setProducts(products)
+            this.setState({products: products})
         })
         .catch((err) => {
             if (err) { alert(err) }
         })
-    })
+    }
 
+    render() {
+        let list = this.state.products.map((product) => (
+            <li key={product.id}>{product.name}</li>
+        ))
 
-    const list = products.map((product) => (
-        <li key={product.id}>{product.name}</li>
-    ))
-
-    return (
-        <>
-            <Heading as="h2">Manage your products</Heading>
-            <ol>
-                {list}
-            </ol>
-        </>
-    )
+        return (
+            <>
+                <Heading as="h2">Manage your products</Heading>
+                <ol>
+                    {list}
+                </ol>
+            </>
+        )
+    }
 }
 
 export default ProductList;
