@@ -19,20 +19,6 @@ const Login = (mode) => {
     const handlePasswordChange = (e) => setPassword(e.target.value)
     const handleSubmit = (e) => {
         e.preventDefault()
-        /*if (username == "poositight") {
-            if (password == "wenomechainsama") {
-                route("/", true);
-                window.localStorage.setItem("role", "partner")
-            }
-            else {
-                setUsernameError("")
-                setPasswordError("Incorrect password.")
-            }
-        }
-        else {
-            setUsernameError("Unknown user.")
-            setPasswordError("")
-        }*/
         window.rvwnClient.authenticate(username, password)
         .then((token) => {
             window.rvwnClient.getSession()

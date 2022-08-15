@@ -1,4 +1,4 @@
-import { Component, h } from 'preact';
+import { Component, Fragment, h } from 'preact';
 
 import { Heading } from "@chakra-ui/react";
 

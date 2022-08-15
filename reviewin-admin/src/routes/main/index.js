@@ -1,11 +1,11 @@
-import { Component, h } from 'preact';
+import { Component, Fragment, h } from 'preact';
 
 import Entrance from "../entrance";
 import ProductList from "../product-list";
 import GiftList from "../gift-list";
 import UserSettings from "../user-settings";
 
-import { Button, ChevronDownIcon, Flex, Heading, Icon, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, HStack, VStack } from '@chakra-ui/react';
+import { Button, Flex, Heading, Icon, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList, Text, HStack, VStack } from '@chakra-ui/react';
 import { BiChevronDown } from 'react-icons/bi';
 import { Router, route } from 'preact-router';
 //import { Link as MatchLink } from 'preact-router/match';
