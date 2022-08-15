@@ -6,26 +6,27 @@ class ReviewinClient {
 		this.sessionDummy = JSON.parse(window.localStorage.getItem("sessionDummy")) || {}
 	}
 
-	authenticate(username, password) {return new Promise((resolve, reject) => {
+	authenticate(email, password) {return new Promise((resolve, reject) => {
 		const users = [
 			{
-				username: "poositight",
+				displayName: "Poosi Tight SARL",
+				email: "contact@poositight.tld",
 				password: "poosiclean",
 				role: "partner"
 			},
 			{
-				username: "kanar",
+				displayName: "Kanar Kanar",
+				email: "kanar@superboitemail.tld",
 				password: "texte du bas",
 				role: "consumer"
 			}
 		]
 
-		const filtered = users.filter(user => user.username == username)
+		const filtered = users.filter(user => user.email == email)
 		if (filtered[0]) {
 			const user = filtered[0]
 			if (user.password == password) {
 				this.token = "dummy"
-				window.localStorage.setItem("rvwntoken", this.token)
 
 				// the server would handle storing the session
 				this.sessionDummy.user = user
@@ -33,6 +34,7 @@ class ReviewinClient {
 
 				this.sessionCache = this.sessionDummy
 
+				window.localStorage.setItem("rvwntoken", this.token)
 				resolve(this.token)
 			}
 			else {

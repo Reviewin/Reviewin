@@ -57,13 +57,13 @@ const Login = (mode) => {
                 <Heading as="h1" size="md" textAlign="center">Log in to Reviewin</Heading>
                 <form onSubmit={handleSubmit}>
                     <FormControl isRequired isInvalid={usernameError}>
-                        <FormLabel htmlFor="username">Username</FormLabel>
-                        <Input id="username" type="text" onChange={handleUsernameChange}></Input>
+                        <FormLabel htmlFor="email">E-mail address</FormLabel>
+                        <Input id="email" name="email" type="email" onChange={handleUsernameChange}></Input>
                         <FormErrorMessage>{usernameError}</FormErrorMessage>
                     </FormControl>
                     <FormControl isRequired isInvalid={passwordError}>
                         <FormLabel htmlFor="password">Password</FormLabel>
-                        <Input id="password" type="password" onChange={handlePasswordChange}></Input>
+                        <Input id="password" name="password" type="password" onChange={handlePasswordChange}></Input>
                         <FormHelperText>{password}</FormHelperText>
                         <FormErrorMessage>{passwordError}</FormErrorMessage>
                     </FormControl>
