@@ -32,7 +32,8 @@ class User_register(BaseModel):
     e_mail: str
     password: str
 
-
+class recaptcha(BaseModel):
+    input_:  str
 
 @api.post('/test')
 async def sign_up(info_user: User_register):
@@ -43,9 +44,9 @@ async def sign_up(info_user: User_register):
 
 @api.post('/users')
 async def test_verification(info_user: User_register):
-    db = couchdb.Database('http://admin:kolea21342@localhost:5984/my_database_2/3b487347101b23f823ef3ca321005958')
+    db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users/')
     info_user = info_user.dict()
-    res = requests.get('http://admin:kolea21342@localhost:5984/my_database_2/3b487347101b23f823ef3ca321005958')
+    res = requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true')
     print(res.text)
     if len(info_user["password"]) < 8 and info_user['e_mail'] in res.text:
         return {"bad":"password","e_mail_user":"in db"}
@@ -80,7 +81,7 @@ def get_image():
     image_path = _recaptcha_2.select_random("web")
     return _responses.FileResponse(image_path)
 
-@api.get('/captcha')
+@api.post('/captcha')
 def return_image():
     ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
     a = _random.choice(ac)
@@ -96,6 +97,36 @@ def return_image():
     gen = image.generate_image(random_string)
     gen_1 = gen.save(random_source)
     return _responses.FileResponse(random_source)
-    
+
+@api.get('/captchaa')
+def return_image():
+    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    a = _random.choice(ac)
+    b = _random.choice(ac)
+    c = _random.choice(ac)
+    d = _random.choice(ac)
+    f = _random.choice(ac)
+    g = _random.choice(ac)
+    h = _random.choice(ac)
+    random_string = a + b + c + d + f + g + h 
+    random_source = random_string + '.png'
+    image = ImageCaptcha(width=100, height=90)
+    image_1 = image.generate_image(random_string).save(random_source)
+    print(random_string)
+    database = captcha_database = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
+    database.save(random_string)
+    return _responses.FileResponse(random_source)
+
+@api.post('/verify_captcha')
+async def verify_captcha_test(recaptcha: captcha):
+    captcha_database = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
+    ma_variable = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
+    if captcha.dict() in ma_variable:
+        return {"Captcha":"good"}
+    else:
+        return {"Not good captcha":"don't let sign up"}
+
+
+
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 8080)
