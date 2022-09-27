@@ -26,7 +26,6 @@ class UserLogin(BaseModel):
 
 
 class User_register(BaseModel):
-    full_name: str
     gender: str
     age: str
     country: str
@@ -36,11 +35,44 @@ class User_register(BaseModel):
 class recaptcha(BaseModel):
     captcha_value:  str
 
+class verification(BaseModel):
+    e_mail: str
+    age: str
+    gender: str
+    password: str
+    country: str
 
 
 class Recaptcha_2(BaseModel):
-    recaptcha_2: str
+    captcha_value: str
 
+@api.post('/reviewin_users')
+async def sign_up(info__: User_register):
+    info__ = info__.dict()
+    db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
+    if len(info__['password']) > 8:
+        db.save(info__)
+    else:
+        {"Status":"Not done"}
+
+
+@api.post('/verify_captcha')
+async def verify_captcha_test(captcha: Recaptcha_2):
+    captcha = captcha.dict()
+    ma_variable = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
+    if captcha['captcha_value'] in ma_variable.text:
+        print("Captcha good")
+        return {"Captcha":"good"}
+    else:
+        return {"Not good captcha":"don't let sign up"}
+
+@api.post('/user')
+async def signup(info_ :User_register):
+    db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
+    info_ = info_.dict()
+    db.save(info_)
+    if db.save(info_):
+        return {"User":"registered"}
 
 @api.post('/test')
 async def sign_up(info_user: User_register):
@@ -73,17 +105,19 @@ async def test_verification(info_user: User_register):
     info_user = info_user.dict()
     res = requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true')
     print(res.text)
-    if info_user["password"] > 8 and info_user["e_mail"] not in res.text:
-        db.save(info_user)
-        return {"Status":"Done"}
-    elif info_user["password"] > 8 and info_user["e_mail"] in res.text:
+    if info_user["e_mail"] in res.text:
         return {"e_mail":"already used"}
-    elif info_user["password"] < 8 and info_user["e_mail"] in res.text:
-        return {"password":"invalid", "e_mail":"already exists"}
-    elif info_user["password"] < 8 and info_user["e_mail"] not in res.text:
-        return {"Status":"Password invalid"}
     else:
-        return False
+        db.save(info_user)
+
+@api.post('/verification_user')
+async def verification(verification_: verification):
+    verification_ = verification.dict()
+    if verification_['e_mail'] in requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true').text:
+        return {"User":"exists"}
+    else:
+        return {"User":"No longer exists"}
+
 
 
 
@@ -127,7 +161,8 @@ async def return_image():
     captcha_value = json.dumps(random_string)
     print(captcha_value)
     json_object = {"captcha_value":captcha_value}
-    res = requests.post('http://admin:kolea21342@localhost:5984/captcha_test', json=json_object)
+    db = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
+    db.save(json_object)
     random_source = random_string + '.png'
     image = ImageCaptcha(width=100, height=90)
     gen = image.generate_image(random_string)
@@ -167,27 +202,18 @@ async def return_image():
     random_source = random_string + '.png'
     image = ImageCaptcha(width=100, height=90)
     image_1 = image.generate_image(random_string).save(random_source)
+    database = captcha_database = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
     print(serialize)
     return _responses.FileResponse(json.dumps(random_source))
 
-@api.post('/verify_captcha')
-async def verify_captcha_test():
-    captcha_database = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
-    ma_variable = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
-    if captcha.dict() in ma_variable:
-        return {"Captcha":"good"}
-    else:
-        return {"Not good captcha":"don't let sign up"}
 
 @api.post('/signin')
 async def sign_in(info_login: UserLogin):
     info_login = info_login.dict()
     url = 'http://admin:kolea21342@localhost:5984/verification/_design/newDesignDoc/_view/new-view?keys=\[\"Ayoub\",\"ayoub_semsar@yahoo.com\",\"kolea21342\"\]'
     res = requests.get(url)
-    print(res.text)
     verification = res.text
-    if info_login['full_name'] and info_login['e_mail'] and info_login['password'] in verification:
-        print("it works")
+    if info_login['e_mail'] and info_login['password'] in verification:
         return {"Status":"Done"}
     else:
         print("it doesn't work")
