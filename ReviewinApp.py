@@ -29,30 +29,73 @@ from kivy.uix.codeinput import CodeInput
 from kivy.extras.highlight import KivyLexer
 from kivy.app import App
 from kivy.animation import Animation
-from kivy.uix.image import Image
+from kivy.uix.image import Image, AsyncImage
 import requests
-from kivy.properties import ObjectProperty 
-import re 
+from kivy.properties import ObjectProperty, ListProperty, StringProperty 
+import regex as re 
 import json
 import random2
 import random
-
-
-
+import couchdb
+from captcha.image import ImageCaptcha
+from kivymd.uix.list import OneLineAvatarListItem
+from kivymd.uix.fitimage import FitImage 
 pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
 #fonts
 LabelBase.register(name="OpenSans",fn_regular="OpenSans-Bold.ttf")
 LabelBase.register(name="RSlab", fn_regular="RobotoSlab-VariableFont_wght.ttf")
 LabelBase.register(name= "Popp",fn_regular="FontsFree-Net-Poppins-Bold.ttf")
-LabelBase.register(name= "Inter", fn_regular= "FontsFree-Net-Inter-Regular.ttf") 
+LabelBase.register(name= "Inter", fn_regular= "FontsFree-Net-Inter-Regular.ttf")
+LabelBase.register(name= "wave", fn_regular= "Wavetosh.ttf")
 
 
 
 Window.size = (360,800)
  
+
+KV = '''
+<Content>
+    orientation: "vertical"
+    spacing: "12dp"
+    size_hint_y: None
+    height: "120dp"
+
+    MDTextField:
+        id: "captcha"
+        hint_text: "Persistent helper text"
+        helper_text: "Text is always here"
+        helper_text_mode: "persistent"
+    AsyncImage:
+        source: 'http://127.0.0.1:2222/captcha'
+        size_hint: (0.5, 0.3)
+    Button:
+        text: "Submit"
+        font_size: "20sp"
+        font_name: "OpenSans"
+        pos_hint: {'center_x': 0.8, 'center_y': 0.8}
+        halign: 'right'
+        theme_text_color: 'Custom'
+        text_color: 1,1,1,1
+        size_hint: (0.15, 0.007)
+        background_color: 41/255, 34/255, 34/255, 1
+        background_normal: ''
+        
+'''
+
+
+
+class Content(BoxLayout):
+    def build(self):
+        return Builder.load_string(KV)
+
+
+
 #principale classe de l'application
 class ReviewinApp(MDApp):
+    dialog = None 
+    dialoge = None
+    asyncimage = None
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
@@ -69,39 +112,194 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file("commentinput.kv"))
         sm.add_widget(Builder.load_file("UserInfo.kv"))
         sm.add_widget(Builder.load_file("recaptcha.kv"))
+        sm.add_widget(Builder.load_file("contact_true.kv"))
         return sm
 
+    def return_async(self):
+        if not self.asyncimage:
+            self.asyncimage = AsyncImage(
+                source="http://127.0.0.1:2222/captcha",
+                size_hint_y= None
+            )
+        self.asyncimage.open()
+
+    def dialog__(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                text="You were successfully registered by our services. We thank you for your confidence, Reviewin Team.",
+                font_name="Popp",
+                theme_text_color= 'Custom',
+                buttons = [
+                    MDFlatButton(
+                        text="Log in.",
+                        theme_text_color='Custom',
+                        text_color= [1,1,1,1],
+                    )
+                ]
+            )
+        self.dialog.open()
+    
+    def log_in_account(self):
+        e_mail = self.root.current_screen.ids.e_mail.text
+        password = self.root.current_screen.ids.e_mail.text
+        json = {'e_mail':json.dumps(e_mail), 'password':json.dumps(password)}
+        res = requests.post('http://127.0.0.1:2222/signin', json=json)
+
+        if res.text == {"Status":"Done"}:
+            sm.current = 'user2'
+        else:
+            toast('Invalid password or e-mail.')
+
+
+    def recaptcha__(self):
+        age = self.root.get_screen('register').ids.age.text
+        e_mail = self.root.get_screen('register').ids.e_mail.text
+        country = self.root.get_screen('register').ids.country.text
+        password = self.root.get_screen('register').ids.password.text
+        gender = self.root.get_screen('register').ids.gender.text
+
+        url = 'http://127.0.0.1:2222/verify_captcha'
+        recaptcha_value = self.root.current_screen.ids.recaptcha.text
+        payload = {"captcha_value":json.dumps(recaptcha_value)}
+        user_data = {"gender":json.dumps(gender), "age":json.dumps(age), "country":json.dumps(country),"e_mail":json.dumps(e_mail), "password":json.dumps(password)}
+
+        res = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
+        resp = requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true')
+        if recaptcha_value in res.text and e_mail not in resp.text:
+            requests.post('http://127.0.0.1:2222/reviewin_users', json=user_data)
+            print('user registered')
+            self.dialog__()
+        elif e_mail in resp.text:
+            toast("User already exists.")
+        else:
+            toast("Invalid captcha value.")
+
+
+    def build_build(self):
+        return Builder.load_string(KV)
+
     def on_start(self):
-        Clock.schedule_once(self.accueil, 30)
+        Clock.schedule_once(self.accueil, 15)
         
     def accueil(*args):
         sm.current = "accueil"
 
     def color_characters_compteur(self):
         self.theme_cls.primary_palette = "Cyan"
+
+
+    def test_input(self):
+        if not self.dialog:
+            self.dialog = MDInputDialog(
+                title= "Recaptcha",
+            )
+        self.dialog.open()
+
+
+    def test_2(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title= "Recaptcha",
+                text="Just copy the text you're seeing",
+                images=[
+                    Image(
+                        source= 'captcha.png',
+                        center_x = self.parent.center_x,
+                        center_y = self.parent.center_y,
+                        size_hint= (0.4, 0.3) 
+                        ),
+                    ],
+                )
+        self.dialog.open()
     
-    def show_alert_dialog(self):
-        dialog = None        
+    def show_alert_dialog(self):      
         if not self.dialog:
             self.dialog = MDDialog(
                 title= "Exit ?",
                 text="Really want to exit ?",
+                images=[
+                    Image(
+                        source= 'captcha.png',
+                        size_hint= (0.4, 0.3) 
+                        ),
+                    ],
                 buttons=[
                     MDFlatButton(
                         text="[u]Sure ! I'll come back ![/u]",
                         theme_text_color="Custom",
                         text_color=[1,1,1,1],
-                        on_press= self.go_back()
+                        on_press= self.go_back
                     ),
                     MDFlatButton(
                         text="No finally, I prefer to stay.",
                         theme_text_color="Custom",
                         text_color= [1,1,1,1],
-                        on_press=  self.stay_app()
+                        on_press=  self.stay_app
                     ),
                 ],
             )
         self.dialog.open()
+
+    def test_ayoub(self):
+        if self.root.current_screen.ids.full_name.text == 'ayoub':
+            test_2()
+        else:
+            print("nnnnn")
+    
+    def do_something(self):
+        full_name = self.root.current_screen.ids.full_name.text
+        print(full_name)
+    
+    def test_rec(self):
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title= "Recaptcha",
+                text="Just copy the text you're seeing",
+                type="custom",
+                height= "400dp",
+                content_cls=Content()
+            )
+        self.dialog.open()
+    
+
+    def recaptcha_de_wish(self):
+        url = 'http://127.0.0.1:2222/captcha'
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title= "Recaptcha",
+                text="Just copy the text you're seeing",
+                type="custom",
+                height= "400dp",
+                buttons=[
+                    MDFlatButton(
+                        text="Submit",
+                        theme_text_color="Custom",
+                        text_color= [0,0,0,0],
+                    )
+                ],
+                content_cls= AsyncImage(
+                    source= 'http://127.0.0.1:2222/captcha',
+                    size_hint_y= None,
+                    ),
+                )
+        self.dialog.open()
+    def verify(self):
+        full_name = self.root.get_screen('register').ids.full_name.text
+        print(full_name)
+
+    def test_dialog(self):
+        if not self.dialoge:
+            self.dialoge = MDDialog(
+                title= "Recaptcha",
+                text="Just copy the text you're seeing",
+                type="custom",
+                height= "400dp",
+                content_cls= AsyncImage(
+                    source= 'http://127.0.0.1:8080/captchaa',
+                    size_hint_y= None,
+                )
+            )
+        self.dialoge.open()
     
     def user2_go(self):
         sm.current = "user2"
@@ -134,7 +332,58 @@ class ReviewinApp(MDApp):
             ],
             
         ),
+    def on_enter_show_recaptcha(self):
+        if not self.asyncimage:
+            self.asyncimage = AsyncImage(
+                source= 'http://127.0.0.1:2222/captcha',
+                size_hint_y= None
+            )
+        self.asyncimage.texture_update()
+    
+    def go_to_screen_rec(self,*args):
+        sm.current == "recaptcha"
 
+    def verify_datas(self, *args):
+        age = self.root.current_screen.ids.age.text
+        country = self.root.current_screen.ids.country.text
+        e_mail = self.root.current_screen.ids.e_mail.text
+        password = self.root.current_screen.ids.password.text
+        gender = self.root.current_screen.ids.gender.text
+        pattern_verify = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
+        list_verify = [0,1,2,3]
+        list_test = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
+
+        if str(age) not in list_test and len(country) not in list_verify and re.search(pattern_verify, e_mail) and len(password) > 8 and gender == "M"or gender == "F":
+            sm.current = "recaptcha"
+        else:
+            toast("Please check your informations while signing up.")
+
+        if len(age) == 0 or len(country) < 3 or len(e_mail) == 0 or len(password) == 0 or len(gender) == 0:
+            toast("There is an empty field. Please check our conditions to register to the application.")
+
+        
+#fonctions_de_secours
+    def test_3(self):
+        list_test = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
+        full_name = self.root.current_screen.ids.full_name.text
+        age = self.root.current_screen.ids.full_name.text
+        country = self.root.current_screen.ids.country.text
+        e_mail = self.root.current_screen.ids.e_mail.text
+        password = self.root.current_screen.ids.e_mail.text
+        gender = self.root.current_screen.ids.gender.text
+        pattern_verify = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
+        list_verify = [1,2,3]
+
+        if int(age) < int(16):
+            print("too low")
+        elif not re.search(pattern, e_mail):
+            print("bad e_mail")
+        elif len(password) < 8:
+            print("bad password")
+
+
+
+#fonction recaptcha de secours
     def recaptcha_test(self, image):
         image= [
             Image(
@@ -190,12 +439,12 @@ class ReviewinApp(MDApp):
 
 
 
-    def check_auth_user(self, e_mail):
+    def check_auth_user(self):
         full_name_text = self.root.current_screen.ids.full_name.text
         age = int(self.root.current_screen.ids.age.text)
         e_mail = self.root.current_screen.ids.e_mail.text
-        gender = str(self.root.current_screen.gender.text)
-        country = self.root.current_screen.country.ids.text 
+        gender = str(self.root.current_screen.ids.gender.text)
+        country = self.root.current_screen.ids.country.text 
         pattern_verify = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
         if len(self.root.current_screen.ids.full_name.text) < 4:
@@ -218,10 +467,12 @@ class ReviewinApp(MDApp):
             toast("Country invalid.")
         else:
             return True
-        if len(self.root.current_screen.ids.full_name.text) < 4 and int(self.root.current_screen.ids.age.text) and self.root.current_screen.ids.gender.text == 'M' or 'F' and re.search(pattern, e_mail) and len(country) < 4:
-            recaptcha_test_succesfull()
+        if len(self.root.current_screen.ids.full_name.text) > 3 and self.root.current_screen.ids.age.text > 16 and self.root.current_screen.ids.gender.text == 'M' or 'F' and re.search(pattern, e_mail) and len(country) > 4:
+            recaptcha_de_wish()
         else:
             toast("Please sign up correctly. We advice you to see the register model.")
+
+
 
     def go_back_1(self):
         sm.current = "register"
@@ -232,7 +483,45 @@ class ReviewinApp(MDApp):
         else:
             print("no")
 
-    def recaptcha_test_succesfull(self):
+
+    def recaptcha(self):
+        ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+        a = random.choice(ac)
+        b = random.choice(ac)
+        c = random.choice(ac)
+        d = random.choice(ac)
+        f = random.choice(ac)
+        g = random.choice(ac)
+        h = random.choice(ac)
+        random_string = a + b + c + d + f + g + h
+        if not self.dialog:
+            self.dialog = MDDialog(
+                title= 'Recaptcha',
+                text_color= [1,1,1,1],
+                text= str(root.random_string),
+                font_name= "wave",
+                font_size= 18,
+                type= 'confirmation',
+                buttons=[
+                    MDFlatButton(
+                        text= 'Submit',
+                        theme_text_color= 'Custom',
+                        text_color= [1,1,1,1],
+                        font_name= 'Popp',
+                        on_release= self.verify_captcha(),                        
+                    ),
+                    MDFlatButton(
+                        text= 'Cancel',
+                        theme_text_color= 'Custom',
+                        text_color= [1,1,1,1],
+                        on_release= self.dismiss()
+                    )
+                ]
+        ),
+        self.dialog.open()
+
+
+    def recaptcha_test_successfull(self):
         #variables de récupérations du text input
         full_name = str(self.root.current_screen.ids.full_name.text)
         gender = str(self.root.current_screen.ids.gender.text)
@@ -240,7 +529,6 @@ class ReviewinApp(MDApp):
         country = str(self.root.current_screen.ids.country.text)
         e_mail = str(self.root.current_screen.ids.e_mail.text)
         password = str(self.root.current_screen.ids.password.text)
-
 
         #variable de serializations en objets json
         data_full_name = json.dumps(str(full_name))
@@ -250,9 +538,16 @@ class ReviewinApp(MDApp):
         data_e_mail = json.dumps(str(e_mail))
 
         #requete post/signup à l'endpoint de l'API.
-        url = 'http://127.0.0.1:2222/test_verification'
+        url = 'http://127.0.0.1:2222/user'
         data = {'full_name':json.dumps(full_name), 'age':json.dumps(age), 'country':json.dumps(country), 'e_mail':json.dumps(e_mail), 'gender':json.dumps(gender), 'password':json.dumps(password)}
         response = requests.post(url, json=data)
+
+    def login(self):
+        full_name_1 = str(self.root.current_screen.ids.full_name_1.text)
+        e_mail_1 = str(self.root.current_screen.ids.e_mail_1.text)
+        password_1 = str(self.root.current_screen.ids.password_1.text)
+        url = 'http://127.0.0.1:8080/'
+        res = requests.post()
 
 
 
@@ -398,6 +693,12 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
+
+
+
+
+
+
 
 
 
