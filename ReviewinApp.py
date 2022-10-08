@@ -44,10 +44,11 @@ pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
 #fonts
 LabelBase.register(name="OpenSans",fn_regular="OpenSans-Bold.ttf")
-LabelBase.register(name="RSlab", fn_regular="RobotoSlab-VariableFont_wght.ttf")
+LabelBase.register(name="RSlab", fn_regular="Rslab.ttf")
 LabelBase.register(name= "Popp",fn_regular="FontsFree-Net-Poppins-Bold.ttf")
 LabelBase.register(name= "Inter", fn_regular= "FontsFree-Net-Inter-Regular.ttf")
 LabelBase.register(name= "wave", fn_regular= "Wavetosh.ttf")
+LabelBase.register(name="Robold,", fn_regular="Robold.ttf")
 
 
 
@@ -93,12 +94,14 @@ class Content(BoxLayout):
 
 #principale classe de l'application
 class ReviewinApp(MDApp):
-    dialog = None 
+    notdialog = None
+    dialog =None
     dialoge = None
     asyncimage = None
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
+        self.theme_cls.theme_style = "Light"
         global sm 
         sm = ScreenManager()
         sm.add_widget(Builder.load_file("splash.kv"))
@@ -113,6 +116,8 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file("UserInfo.kv"))
         sm.add_widget(Builder.load_file("recaptcha.kv"))
         sm.add_widget(Builder.load_file("contact_true.kv"))
+        sm.add_widget(Builder.load_file('myinfo.kv'))
+        sm.add_widget(Builder.load_file('sign_in_1.kv'))
         return sm
 
     def return_async(self):
@@ -140,15 +145,44 @@ class ReviewinApp(MDApp):
         self.dialog.open()
     
     def log_in_account(self):
-        e_mail = self.root.current_screen.ids.e_mail.text
-        password = self.root.current_screen.ids.e_mail.text
-        json = {'e_mail':json.dumps(e_mail), 'password':json.dumps(password)}
-        res = requests.post('http://127.0.0.1:2222/signin', json=json)
+        e_mail = self.root.current_screen.ids.e_mail_1.text
+        password = self.root.current_screen.ids.password_1.text
+        payload = {'e_mail':json.dumps(e_mail), 'password':json.dumps(password)}
+        pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
-        if res.text == {"Status":"Done"}:
+        res = requests.post('http://127.0.0.1:2222/signin', json=payload)
+        if re.search(pattern, e_mail) and res.text == {"Status":"Done"}:
             sm.current = 'user2'
         else:
             toast('Invalid password or e-mail.')
+
+    def test_6(self):
+        print('tttt')
+
+    def test_enter(self):
+        self.test_6()
+    
+    def current(self):
+        sm.current = "login"
+
+    def dialog_(self):
+        if not self.notdialog:
+            self.dialog = MDDialog(
+                text="You were successfully registered ! We, The Reviewin Team, are pleased to welcome you as a Reviewin User. Enjoy !",
+                font_name="Popp",
+                font_size="17sp",
+                theme_text_color='Custom',
+                buttons=[
+                    MDFlatButton(
+                        text="Log In",
+                        text_color= [0,0,0,0],
+                        radius= [20],
+                        on_press= self.current()
+                    )
+                ]
+
+            )
+
 
 
     def recaptcha__(self):
@@ -159,18 +193,21 @@ class ReviewinApp(MDApp):
         gender = self.root.get_screen('register').ids.gender.text
 
         url = 'http://127.0.0.1:2222/verify_captcha'
+        url_verify = 'http://127.0.0.1:2222/verify_user'
+        url_register = 'http://127.0.0.1:2222/reviewin_users'
         recaptcha_value = self.root.current_screen.ids.recaptcha.text
-        payload = {"captcha_value":json.dumps(recaptcha_value)}
-        user_data = {"gender":json.dumps(gender), "age":json.dumps(age), "country":json.dumps(country),"e_mail":json.dumps(e_mail), "password":json.dumps(password)}
+        payload = {"captcha_value":recaptcha_value}
+        user_data = {"gender":gender, "age":age, "country":country,"e_mail":e_mail, "password":password}
+        res =  requests.post(url, json=payload)
+        e_mail_1 = {"e_mail":e_mail}
+        resp = requests.post(url_verify, json=e_mail_1)
 
-        res = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
-        resp = requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true')
-        if recaptcha_value in res.text and e_mail not in resp.text:
-            requests.post('http://127.0.0.1:2222/reviewin_users', json=user_data)
-            print('user registered')
-            self.dialog__()
-        elif e_mail in resp.text:
-            toast("User already exists.")
+        if res.text == {"Captcha":"good"} and resp.text == {"user:":"no longer exist"}:
+            response = requests.post(url, json=user_data)
+            if response.text == {"User":"exists"}:
+                toast("E-mail already used.")
+            else:
+                self.dialog_()
         else:
             toast("Invalid captcha value.")
 
@@ -179,7 +216,7 @@ class ReviewinApp(MDApp):
         return Builder.load_string(KV)
 
     def on_start(self):
-        Clock.schedule_once(self.accueil, 15)
+        Clock.schedule_once(self.accueil, 3)
         
     def accueil(*args):
         sm.current = "accueil"
@@ -693,7 +730,6 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
-
 
 
 
