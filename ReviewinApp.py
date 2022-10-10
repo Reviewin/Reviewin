@@ -180,8 +180,8 @@ class ReviewinApp(MDApp):
                         on_press= self.current()
                     )
                 ]
-
             )
+        self.dialog.open()
 
 
 
@@ -191,25 +191,27 @@ class ReviewinApp(MDApp):
         country = self.root.get_screen('register').ids.country.text
         password = self.root.get_screen('register').ids.password.text
         gender = self.root.get_screen('register').ids.gender.text
+        recaptcha_value = self.root.current_screen.ids.recaptcha.text
+        points = 0
 
         url = 'http://127.0.0.1:2222/verify_captcha'
         url_verify = 'http://127.0.0.1:2222/verify_user'
         url_register = 'http://127.0.0.1:2222/reviewin_users'
-        recaptcha_value = self.root.current_screen.ids.recaptcha.text
         payload = {"captcha_value":recaptcha_value}
-        user_data = {"gender":gender, "age":age, "country":country,"e_mail":e_mail, "password":password}
+        print(payload)
+        user_data = {"gender":gender, "age":age, "country":country,"e_mail":e_mail, "password":password, "points":points} 
         res =  requests.post(url, json=payload)
         e_mail_1 = {"e_mail":e_mail}
         resp = requests.post(url_verify, json=e_mail_1)
 
-        if res.text == {"Captcha":"good"} and resp.text == {"user:":"no longer exist"}:
-            response = requests.post(url, json=user_data)
-            if response.text == {"User":"exists"}:
-                toast("E-mail already used.")
-            else:
-                self.dialog_()
-        else:
+        if res.json() == {"Captcha":"good"} and resp.json() == {"user":"no longer exist"}:
+            response = requests.post(url_register, json=user_data)
+            self.dialog_()
+            print('User registered')
+        elif res.json() != {"Captcha":"good"} and resp.text != {"user":"no longer exist"}:
             toast("Invalid captcha value.")
+        else:
+            toast("E-mail already used.")
 
 
     def build_build(self):
