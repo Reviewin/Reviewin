@@ -147,14 +147,15 @@ class ReviewinApp(MDApp):
     def log_in_account(self):
         e_mail = self.root.current_screen.ids.e_mail_1.text
         password = self.root.current_screen.ids.password_1.text
-        payload = {'e_mail':json.dumps(e_mail), 'password':json.dumps(password)}
-        pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
+        json_datas = {"e_mail":e_mail, "password":password}
+        url = 'http://127.0.0.1:2222/log-in'
+        res = requests.post(url, json=json_datas)
 
-        res = requests.post('http://127.0.0.1:2222/signin', json=payload)
-        if re.search(pattern, e_mail) and res.text == {"Status":"Done"}:
-            sm.current = 'user2'
+        if res.json() == {"User":"exists"}:
+            sm.current = "user-interface"
         else:
-            toast('Invalid password or e-mail.')
+            toast("Invalid e-mail or password.", duration=2.5)
+
 
     def test_6(self):
         print('tttt')
@@ -176,7 +177,6 @@ class ReviewinApp(MDApp):
                     MDFlatButton(
                         text="Log In",
                         text_color= [0,0,0,0],
-                        radius= [20],
                         on_press= self.current()
                     )
                 ]
@@ -206,12 +206,12 @@ class ReviewinApp(MDApp):
 
         if res.json() == {"Captcha":"good"} and resp.json() == {"user":"no longer exist"}:
             response = requests.post(url_register, json=user_data)
-            self.dialog_()
+            sm.current = "login"
             print('User registered')
         elif res.json() != {"Captcha":"good"} and resp.text != {"user":"no longer exist"}:
             toast("Invalid captcha value.")
         else:
-            toast("E-mail already used.")
+            toast("E-mail already used.", duration=3)
 
 
     def build_build(self):
@@ -732,19 +732,4 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
