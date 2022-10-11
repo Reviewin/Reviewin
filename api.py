@@ -52,7 +52,8 @@ class Recaptcha_2(BaseModel):
 async def sign_up(info__: User_register):
     info__ = info__.dict()
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
-    if len(info__['password']) > 8:
+    if len(info__['password']) > 8 and info__['points'] == 0:
+        print("User registered")
         db.save(info__)
     else:
         {"Status":"Not done"}
@@ -62,22 +63,25 @@ async def sign_up(info__: User_register):
 async def verify_user(user_verif :user__):
     user_verif = user_verif.dict()
     user_e_mail = user_verif['e_mail']
-    url = 'http://admin:kolea21342@localhost:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' "\\" + '"' + user_e_mail + "\\" + '"' +'"' 
+    url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
     res = requests.get(url)
-    if user_e_mail in res.text:
+    print(url)
+    print(res.text)
+    if str(user_e_mail) in res.text:
+        print('User exists')
         return {"User":"exists"}
     else:
-        return {"user:":"no longer exist"}
+        return {"User":'no longer exists'}
 
 
 @api.post('/verify_captcha')
 async def verify_captcha_test(captcha: Recaptcha_2):
     captcha = captcha.dict()
-    captcha_value = str(captcha['captcha_value'])
-    url = 'http://admin:kolea21342@localhost:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + '"' "\\" + '"' + captcha_value + "\\" + '"' +'"' 
+    captcha_value = captcha['captcha_value']
+    url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
     print(url)
     ma_variable = requests.get(url)
-    if captcha['captcha_value'] in ma_variable.text:
+    if captcha_value in ma_variable.text:
         print("Captcha good")
         return {"Captcha":"good"}
     else:
@@ -90,6 +94,18 @@ async def signup(info_ :User_register):
     db.save(info_)
     if db.save(info_):
         return {"User":"registered"}
+
+@api.post('/log-in')
+async def signin(info_login: UserLogin):
+    info_login = info_login.dict()
+    info_e_mail = info_login['e_mail']
+    info_password = info_login['password']
+    url = 'http://admin:kolea21342@127.0.0.1:2222/reviewin_users/_design/design_users/_view/login?key=' + "%22\%22" + info_e_mail + "\%22%22"
+    res = requests.get(url)
+    if info_e_mail in res.text and info_password in res.text:
+        return {"User":"exists"}
+    else:
+        return {"Invalid":"password or e-mail"}
 
 @api.post('/test')
 async def sign_up(info_user: User_register):
