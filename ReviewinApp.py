@@ -35,7 +35,7 @@ from kivy.properties import ObjectProperty, ListProperty, StringProperty
 import regex as re 
 import json
 import random2
-import random
+import random as _random
 import couchdb
 from captcha.image import ImageCaptcha
 from kivymd.uix.list import OneLineAvatarListItem
@@ -94,6 +94,15 @@ class Content(BoxLayout):
 
 #principale classe de l'application
 class ReviewinApp(MDApp):
+    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    a = _random.choice(ac)
+    b = _random.choice(ac)
+    c = _random.choice(ac)
+    d = _random.choice(ac)
+    f = _random.choice(ac)
+    g = _random.choice(ac)
+    h = _random.choice(ac)
+    token = a + b + c + d + f + g + h
     notdialog = None
     dialog =None
     dialoge = None
@@ -127,6 +136,10 @@ class ReviewinApp(MDApp):
                 size_hint_y= None
             )
         self.asyncimage.open()
+    
+    def test_token(self):
+        print(self.token)
+
 
     def dialog__(self):
         if not self.dialog:
@@ -144,18 +157,41 @@ class ReviewinApp(MDApp):
             )
         self.dialog.open()
     
-    def log_in_account(self):
+    def test_entering(self):
+        res = requests.get('http://127.0.0.1:2222/ver')
+        print(res)
+    
+    def login__(self):
         e_mail = self.root.current_screen.ids.e_mail_1.text
         password = self.root.current_screen.ids.password_1.text
+        token = self.token
         json_datas = {"e_mail":e_mail, "password":password}
         url = 'http://127.0.0.1:2222/log-in'
+        url_db = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key="' + e_mail + '"'
         res = requests.post(url, json=json_datas)
+        resp = requests.get(url_db)
+        doc = resp.json()
+        password_1 = doc['rows'][1]['value']['password']
+        e_mail_1 = doc['rows'][1]['key']
+        sessions_datas = {'e_mail':e_mail, 'password':password, 'age': doc['rows'][1]['value']['age'], 'country': doc['rows'][1]['value']['country'], 'gender': doc['rows'][1]['value']['gender'], 'token':token}
 
-        if res.json() == {"User":"exists"}:
-            sm.current = "user-interface"
+        if res.text == {"User":"exists"}:
+            response = requests.post('http://127.0.0.1:5984/sessions', json=sessions_datas)
+            sm.current = 'user-interface'
+        elif res.text == {"User":"no longer exists"}:
+            toast('User no longer exists', duration=2.5)
         else:
-            toast("Invalid e-mail or password.", duration=2.5)
+            toast('Invalid password or e_mail', duration)
+    
+    def load_e_mail(self):
+        text = self.root.get_screen('login').ids.e_mail_1.text
 
+    def load_password(self):
+        text = self.root.get_screen('login').ids.password_1.text
+    
+    def load_gender_js(self):
+        self.text = "aaa"
+    
 
     def test_6(self):
         print('tttt')
@@ -204,11 +240,11 @@ class ReviewinApp(MDApp):
         e_mail_1 = {"e_mail":e_mail}
         resp = requests.post(url_verify, json=e_mail_1)
 
-        if res.json() == {"Captcha":"good"} and resp.json() == {"user":"no longer exist"}:
+        if res.json() == {"Captcha":"good"} and resp.json() == {"User":"no longer exists"}:
             response = requests.post(url_register, json=user_data)
             sm.current = "login"
             print('User registered')
-        elif res.json() != {"Captcha":"good"} and resp.text != {"user":"no longer exist"}:
+        elif res.json() != {"Captcha":"good"} and resp.text == {"user":"no longer exist"}:
             toast("Invalid captcha value.")
         else:
             toast("E-mail already used.", duration=3)
@@ -250,7 +286,24 @@ class ReviewinApp(MDApp):
                     ],
                 )
         self.dialog.open()
-    
+
+
+    def account(self):
+        password = self.root.current_screen.ids.password_1.text
+        e_mail = self.root.current_screen.ids.e_mail_1.text
+        token = self.token
+        url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + e_mail + '"'
+        res = requests.get(url)
+        doc = res.json()
+        if  doc['rows'][1]['key'] == e_mail and doc['rows'][1]['value']['password'] == password:
+            data = {"e_mail":e_mail, "password":password, "token": token, "gender":doc['rows'][1]['value']['gender'],'age':doc['rows'][1]['value']['age'], 'country':doc['rows'][1]['value']['country']}
+            response = requests.post('http://admin:kolea21342@127.0.0.1:5984/sessions', json=data)
+            sm.current = "user-interface"
+        elif e_mail not in doc and password not in doc:
+            toast('User no longer exists')
+        else:
+            toast('Invalid password or e-mail.')
+        
     def show_alert_dialog(self):      
         if not self.dialog:
             self.dialog = MDDialog(
@@ -587,8 +640,12 @@ class ReviewinApp(MDApp):
         password_1 = str(self.root.current_screen.ids.password_1.text)
         url = 'http://127.0.0.1:8080/'
         res = requests.post()
-
-
+    
+    def load_personal_informations(self):
+        e_mail = self.root.get_screen('login').ids.e_mail_1.text
+        password = self.root.get_screen('login').ids.password_1.text
+        self.root.current_screen.ids.user_e_mail.text = e_mail
+        self.root.current_screen.ids.password2.text = password
 
 
 #fonction de secours dont on aura surement pas besoin p
