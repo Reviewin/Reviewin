@@ -1,3 +1,18 @@
+from cProfile import run
+from math import fabs
+from os import access
+from pickle import TRUE
+from turtle import onclick
+from unittest import removeResult
+from kivy.uix.screenmanager import ScreenManager, Screen 
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivymd.app import MDApp
+from kivy.clock import Clock
+from kivy.uix.widget import Widget
+from kivy.core.text import LabelBase 
+from kivy.uix.button import Button 
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.button import Button
 from kivymd.uix.button import MDIconButton, MDFlatButton, MDFillRoundFlatIconButton, MDRoundFlatButton, MDRectangleFlatButton, MDFillRoundFlatButton
@@ -280,12 +295,11 @@ class ReviewinApp(MDApp):
         url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + e_mail + '"'
         res = requests.get(url)
         doc = res.json()
-        if  e_mail in doc and password in doc:
+        print(doc)
+        if e_mail in res.text and password in res.text:
             data = {"e_mail":e_mail, "password":password, "token": token, "gender":doc['rows'][1]['value']['gender'],'age':doc['rows'][1]['value']['age'], 'country':doc['rows'][1]['value']['country']}
             response = requests.post('http://admin:kolea21342@127.0.0.1:5984/sessions', json=data)
             sm.current = "user-interface"
-        elif e_mail not in doc and password not in doc:
-            toast('User no longer exists')
         else:
             toast('Invalid password or e-mail.')
         
@@ -774,3 +788,4 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
+
