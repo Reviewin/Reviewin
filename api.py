@@ -19,6 +19,17 @@ from captcha.image import ImageCaptcha
 
 api = FastAPI() #on instancie 
 
+class logout(BaseModel):
+    e_mail: str
+
+class sessions(BaseModel):
+    e_mail: str
+    country: str
+    age: str
+    gender: str
+    token: str
+
+
 class UserLogin(BaseModel):
     e_mail: str
     password: str
@@ -102,16 +113,13 @@ async def signin(info_login: UserLogin):
     info_password = info_login['password']
     url = 'http://admin:kolea21342@127.0.0.1:2222/reviewin_users/_design/design_users/_view/login?key=' + "%22\%22" + info_e_mail + "\%22%22"
     res = requests.get(url)
-    if info_e_mail in res.text and info_password in res.text:
+    print(res.json())
+    doc = res.json()
+    if info_e_mail in res.json() and info_password in res.json():
         return {"User":"exists"}
     else:
         return {"Invalid":"password or e-mail"}
 
-@api.post('/test')
-async def sign_up(info_user: User_register):
-    db = couchdb.Database('http://admin:kolea21342@localhost:5984/my_database_2')
-    db.save(info_user.dict())
-    return {"Status":"Done"}
 
 
 @api.post('/check_captcha_value')
@@ -162,29 +170,6 @@ async def verification(verification_: verification):
         return {"User":"No longer exists"}
 
 
-
-
-@api.get('/login')
-async def login_user():
-    res = requests.get('http://admin:kolea21342@localhost:5984/db_reviewin_2/9f86611934b286b7ae19c35c6c000409')
-    print(res.text)
-    if "John Doe" in res.text:
-        print("It's on db")
-    else:
-        return {"Status":"Not Done"}
-
-templates = Jinja2Templates(directory="static")
-api.mount("/static", StaticFiles(directory="static"), name="static")
-
-@api.get('/signup', response_class= HTMLResponse)
-async def return_html(request: Request):
-    context = {'request':request}
-    return templates.TemplateResponse('index_.html', context)
-
-@api.post('/test')
-async def test():
-    return {"Test":"not done"}
-
 @api.get("/recaptcha")
 def get_image():
     image_path = _recaptcha_2.select_random("web")
@@ -213,6 +198,43 @@ async def return_image():
     gen_1 = gen.save(random_source)
     return _responses.FileResponse(random_source)
 
+
+@api.post('/sessions')
+async def sessions(user_session: sessions):
+    user_sessions = user_sessions.dict()
+    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    a = _random.choice(ac)
+    b = _random.choice(ac)
+    c = _random.choice(ac)
+    d = _random.choice(ac)
+    f = _random.choice(ac)
+    g = _random.choice(ac)
+    h = _random.choice(ac)
+    token = a + b + c + d + f + g + h
+    db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
+    doc_json = {'e_mail':user_sessions['e_mail'],'age':user_sessions['age'], 'country':user_sessions['country'], 'gender':user_sessions['gender']}
+    db.save(doc_json)
+    return {doc_json}
+
+@api.post('/logout')
+async def logout(log_out: logout):
+    log_out = log_out.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/sessionsview?key='+'"'+ log_out['e_mail'] + '"'
+    res = requests.get(url)
+    doc = res.json()
+    doc_id = doc['rows'][1]['id']
+    url_document = 'http://admin:kolea21342@127.0.0.1:5984/sessions/' + doc_id
+    if __name__ == '__main__':
+        res = requests.delete(url_document)
+        return {"Session":"deleted"}
+    else:
+        return {"Session":"failed to delete"}
+
+
+@api.get('/text')
+def tt():
+    return {"True"}
+
 @api.post('/check_captcha')
 async def check_captcha(captcha: recaptcha):
     captcha = captcha.dict()
@@ -223,33 +245,6 @@ async def check_captcha(captcha: recaptcha):
         return {"Status":"Captcha passed"}
     else:
         return {"Status":"Not Done"}
-
-
-
-@api.get("/ver")
-def s():
-    return {"s":"s"}
-
-
-@api.get('/captchaa')
-async def return_image():
-    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    a = _random.choice(ac)
-    b = _random.choice(ac)
-    c = _random.choice(ac)
-    d = _random.choice(ac)
-    f = _random.choice(ac)
-    g = _random.choice(ac)
-    h = _random.choice(ac)
-    random_string = a + b + c + d + f + g + h 
-    serialize = json.dumps(random_string)
-    random_source = random_string + '.png'
-    image = ImageCaptcha(width=100, height=90)
-    image_1 = image.generate_image(random_string).save(random_source)
-    database = captcha_database = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
-    print(serialize)
-    return _responses.FileResponse(json.dumps(random_source))
-
 
 @api.post('/signin')
 async def sign_in(info_login: UserLogin):
@@ -262,27 +257,27 @@ async def sign_in(info_login: UserLogin):
         print("it doesn't work")
         return {"Status":"Not done"}
 
+@api.post('/endpoint')
+def test():
+    return {"test":"done"}
+
 @api.post('/log-in')
 async def log_in(info_login: UserLogin):
-    res = requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs')
     info_login = info_login.dict()
-    print(str(info_login['e_mail']))
-    print(str(info_login['password']))
-
-    if str(info_login['e_mail']) in res.text and str(info_login['password']) in res.text:
-        return {"Status":"Done"}
+    url = 'http://admin:kolea21342@localhost:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + info_login['e_mail'] + '"'
+    res = requests.get(url)
+    doc = res.json()
+    password = doc['rows'][1]['value']['password']
+    e_mail = doc['rows'][1]['key']
+    if info_login['e_mail'] != e_mail or info_login['password'] != password:
+        return {'Status':'Not done'}
+    elif info_login['e_mail'] not in res.json():
+        return {"User":"no longer exists"}
     else:
-        return {"Status":"Not done"}
-
-@api.get('/test_login')
-async def return_som():
-    return {"Hello":"World"}
-
-@api.post('/test_something')
-async def return_something(info_login: UserLogin):
-    return True
-
-
+        return {"User":"exists"}
+@api.get('/get')
+async def get():
+    return {'True'}
 
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2222)
