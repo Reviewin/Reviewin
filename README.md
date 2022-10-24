@@ -7,6 +7,6 @@ Sign up (Done)
 
 Captcha Ali express (Done)
 
-Sign in, done with a view, still something to adjust but almost finished
+Sign in/load personal datas (Done)
 
-Adding products (in the future)
+Adding products (currently working)
