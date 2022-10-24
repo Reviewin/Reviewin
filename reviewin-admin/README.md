@@ -9,24 +9,17 @@ Chakra 2.x requires support for [useId in react 18](https://github.com/preactjs/
 which is currently not implemented in Preact.
 Currently [using Chakra 1.x](https://github.com/redwoodjs/redwood/issues/5601#issuecomment-1133584714), should update Preact and Chakra when possible.
 
-## CLI Commands
-(ajouté automatiquement par preact-cli)
+## Commandes de développement
 
 ``` bash
-# install dependencies
+# installer les dépendances
 npm install
 
-# serve with hot reload at localhost:8080
-npm run dev
+# démarre un serveur de développement à l'adresse indiquée
+# recompile automatiquement lors des modifications
+node build.js serve
 
-# build for production with minification
+# compiler l'application pour la production dans /dist
 npm run build
 
-# test the production build locally
-npm run serve
-
-# run tests with jest and enzyme
-npm run test
 ```
-
-For detailed explanation on how things work, checkout the [CLI Readme](https://github.com/developit/preact-cli/blob/master/README.md).
