@@ -94,6 +94,7 @@ class Content(BoxLayout):
 
 #principale classe de l'application
 class ReviewinApp(MDApp):
+    new_dialog = None
     ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
     a = _random.choice(ac)
     b = _random.choice(ac)
@@ -295,13 +296,13 @@ class ReviewinApp(MDApp):
         url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + e_mail + '"'
         res = requests.get(url)
         doc = res.json()
-        print(doc)
         if e_mail in res.text and password in res.text:
             data = {"e_mail":e_mail, "password":password, "token": token, "gender":doc['rows'][1]['value']['gender'],'age':doc['rows'][1]['value']['age'], 'country':doc['rows'][1]['value']['country']}
             response = requests.post('http://admin:kolea21342@127.0.0.1:5984/sessions', json=data)
             sm.current = "user-interface"
         else:
             toast('Invalid password or e-mail.')
+    
         
     def show_alert_dialog(self):      
         if not self.dialog:
@@ -351,6 +352,54 @@ class ReviewinApp(MDApp):
                 content_cls=Content()
             )
         self.dialog.open()
+    
+    def press(self):
+        print('pressed')
+
+
+    def logoutnew(self):
+        e_mail = self.root.get_screen('login').ids.e_mail_1.text
+        log_out_data = {"e_mail":e_mail}
+        url = 'http://127.0.0.1:2222/log_out'
+        res = requests.post(url, json=log_out_data)
+        if res.text == {"Session":"deleted"}:
+            sm.current = "login"
+        else:
+            toast('Failed to log out. Please verify your wifi connection or try again.')
+
+        
+    def log_out(self):
+        if not self.new_dialog:
+            self.new_dialog = MDDialog(
+                title= "Log out",
+                text= "Are you sure to log out ?",
+                font_size= "18",
+                font_name= "Robold",
+                type= "custom",
+                buttons = [
+                    MDFlatButton(
+                        text= "[u]Yes[/u]",
+                        text_color= [1,1,1,1],
+                        font_size= "17sp",
+                        font_name= "Popp",
+                        theme_text_color= "Custom",
+                        on_release= self.logoutnew(),
+                        md_bg_color= [0,1,0,0]
+                    ),
+                    MDFlatButton(
+                        text= "[u]No.[/u]",
+                        text_color= [1,1,1,1],
+                        font_size= "17sp",
+                        font_name="Popp",
+                        theme_text_color= "Custom",
+                        on_relase= self.newdialog.dismiss()
+                        md_bg_color= [1,0,0,0]
+                    )
+                ]
+            )
+
+
+
     
 
     def recaptcha_de_wish(self):
@@ -645,8 +694,17 @@ class ReviewinApp(MDApp):
         password = self.root.get_screen('login').ids.password_1.text
         self.root.current_screen.ids.user_e_mail.text = e_mail
         self.root.current_screen.ids.password2.text = password
+        url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + e_mail + '"'
+        res = requests.get(url)
+        doc = res.json()
+        gender = doc['rows'][1]['value']['gender']
+        age = doc['rows'][1]['value']['age']
+        country = doc['rows'][1]['value']['country']
+        self.root.current_screen.ids.gender_1.text = gender
+        self.root.current_screen.ids.age_1.text = age
+        self.root.current_screen.ids.country_1.text = country
 
-
+        
 #fonction de secours dont on aura surement pas besoin p
     def create_user(self):
         full_name = str(self.root.current_screen.ids.full_name.text)
@@ -700,8 +758,6 @@ class Condition(Screen):
         co = Screen()
         co = Builder.load_file('conditions.kv')
         return co
-
-
 
 
 class Accueil(Screen):
@@ -788,4 +844,5 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
+
 
