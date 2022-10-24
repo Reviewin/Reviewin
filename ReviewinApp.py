@@ -35,7 +35,7 @@ from kivy.properties import ObjectProperty, ListProperty, StringProperty
 import regex as re 
 import json
 import random2
-import random
+import random as _random
 import couchdb
 from captcha.image import ImageCaptcha
 from kivymd.uix.list import OneLineAvatarListItem
@@ -44,10 +44,11 @@ pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
 #fonts
 LabelBase.register(name="OpenSans",fn_regular="OpenSans-Bold.ttf")
-LabelBase.register(name="RSlab", fn_regular="RobotoSlab-VariableFont_wght.ttf")
+LabelBase.register(name="RSlab", fn_regular="Rslab.ttf")
 LabelBase.register(name= "Popp",fn_regular="FontsFree-Net-Poppins-Bold.ttf")
 LabelBase.register(name= "Inter", fn_regular= "FontsFree-Net-Inter-Regular.ttf")
 LabelBase.register(name= "wave", fn_regular= "Wavetosh.ttf")
+LabelBase.register(name="Robold,", fn_regular="Robold.ttf")
 
 
 
@@ -93,12 +94,24 @@ class Content(BoxLayout):
 
 #principale classe de l'application
 class ReviewinApp(MDApp):
-    dialog = None 
+    new_dialog = None
+    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    a = _random.choice(ac)
+    b = _random.choice(ac)
+    c = _random.choice(ac)
+    d = _random.choice(ac)
+    f = _random.choice(ac)
+    g = _random.choice(ac)
+    h = _random.choice(ac)
+    token = a + b + c + d + f + g + h
+    notdialog = None
+    dialog =None
     dialoge = None
     asyncimage = None
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
+        self.theme_cls.theme_style = "Light"
         global sm 
         sm = ScreenManager()
         sm.add_widget(Builder.load_file("splash.kv"))
@@ -113,6 +126,8 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file("UserInfo.kv"))
         sm.add_widget(Builder.load_file("recaptcha.kv"))
         sm.add_widget(Builder.load_file("contact_true.kv"))
+        sm.add_widget(Builder.load_file('myinfo.kv'))
+        sm.add_widget(Builder.load_file('sign_in_1.kv'))
         return sm
 
     def return_async(self):
@@ -122,6 +137,10 @@ class ReviewinApp(MDApp):
                 size_hint_y= None
             )
         self.asyncimage.open()
+    
+    def test_token(self):
+        print(self.token)
+
 
     def dialog__(self):
         if not self.dialog:
@@ -139,16 +158,68 @@ class ReviewinApp(MDApp):
             )
         self.dialog.open()
     
-    def log_in_account(self):
-        e_mail = self.root.current_screen.ids.e_mail.text
-        password = self.root.current_screen.ids.e_mail.text
-        json = {'e_mail':json.dumps(e_mail), 'password':json.dumps(password)}
-        res = requests.post('http://127.0.0.1:2222/signin', json=json)
+    def test_entering(self):
+        res = requests.get('http://127.0.0.1:2222/ver')
+        print(res)
+    
+    def login__(self):
+        e_mail = self.root.current_screen.ids.e_mail_1.text
+        password = self.root.current_screen.ids.password_1.text
+        token = self.token
+        json_datas = {"e_mail":e_mail, "password":password}
+        url = 'http://127.0.0.1:2222/log-in'
+        url_db = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key="' + e_mail + '"'
+        res = requests.post(url, json=json_datas)
+        resp = requests.get(url_db)
+        doc = resp.json()
+        password_1 = doc['rows'][1]['value']['password']
+        e_mail_1 = doc['rows'][1]['key']
+        sessions_datas = {'e_mail':e_mail, 'password':password, 'age': doc['rows'][1]['value']['age'], 'country': doc['rows'][1]['value']['country'], 'gender': doc['rows'][1]['value']['gender'], 'token':token}
 
-        if res.text == {"Status":"Done"}:
-            sm.current = 'user2'
+        if res.text == {"User":"exists"}:
+            response = requests.post('http://127.0.0.1:5984/sessions', json=sessions_datas)
+            sm.current = 'user-interface'
+        elif res.text == {"User":"no longer exists"}:
+            toast('User no longer exists', duration=2.5)
         else:
-            toast('Invalid password or e-mail.')
+            toast('Invalid password or e_mail', duration)
+    
+    def load_e_mail(self):
+        text = self.root.get_screen('login').ids.e_mail_1.text
+
+    def load_password(self):
+        text = self.root.get_screen('login').ids.password_1.text
+    
+    def load_gender_js(self):
+        self.text = "aaa"
+    
+
+    def test_6(self):
+        print('tttt')
+
+    def test_enter(self):
+        self.test_6()
+    
+    def current(self):
+        sm.current = "login"
+
+    def dialog_(self):
+        if not self.notdialog:
+            self.dialog = MDDialog(
+                text="You were successfully registered ! We, The Reviewin Team, are pleased to welcome you as a Reviewin User. Enjoy !",
+                font_name="Popp",
+                font_size="17sp",
+                theme_text_color='Custom',
+                buttons=[
+                    MDFlatButton(
+                        text="Log In",
+                        text_color= [0,0,0,0],
+                        on_press= self.current()
+                    )
+                ]
+            )
+        self.dialog.open()
+
 
 
     def recaptcha__(self):
@@ -157,29 +228,34 @@ class ReviewinApp(MDApp):
         country = self.root.get_screen('register').ids.country.text
         password = self.root.get_screen('register').ids.password.text
         gender = self.root.get_screen('register').ids.gender.text
+        recaptcha_value = self.root.current_screen.ids.recaptcha.text
+        points = 0
 
         url = 'http://127.0.0.1:2222/verify_captcha'
-        recaptcha_value = self.root.current_screen.ids.recaptcha.text
-        payload = {"captcha_value":json.dumps(recaptcha_value)}
-        user_data = {"gender":json.dumps(gender), "age":json.dumps(age), "country":json.dumps(country),"e_mail":json.dumps(e_mail), "password":json.dumps(password)}
+        url_verify = 'http://127.0.0.1:2222/verify_user'
+        url_register = 'http://127.0.0.1:2222/reviewin_users'
+        payload = {"captcha_value":recaptcha_value}
+        print(payload)
+        user_data = {"gender":gender, "age":age, "country":country,"e_mail":e_mail, "password":password, "points":points} 
+        res =  requests.post(url, json=payload)
+        e_mail_1 = {"e_mail":e_mail}
+        resp = requests.post(url_verify, json=e_mail_1)
 
-        res = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
-        resp = requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true')
-        if recaptcha_value in res.text and e_mail not in resp.text:
-            requests.post('http://127.0.0.1:2222/reviewin_users', json=user_data)
-            print('user registered')
-            self.dialog__()
-        elif e_mail in resp.text:
-            toast("User already exists.")
-        else:
+        if res.json() == {"Captcha":"good"} and resp.json() == {"User":"no longer exists"}:
+            response = requests.post(url_register, json=user_data)
+            sm.current = "login"
+            print('User registered')
+        elif res.json() != {"Captcha":"good"} and resp.text == {"user":"no longer exist"}:
             toast("Invalid captcha value.")
+        else:
+            toast("E-mail already used.", duration=3)
 
 
     def build_build(self):
         return Builder.load_string(KV)
 
     def on_start(self):
-        Clock.schedule_once(self.accueil, 15)
+        Clock.schedule_once(self.accueil, 3)
         
     def accueil(*args):
         sm.current = "accueil"
@@ -211,7 +287,23 @@ class ReviewinApp(MDApp):
                     ],
                 )
         self.dialog.open()
+
+
+    def account(self):
+        password = self.root.current_screen.ids.password_1.text
+        e_mail = self.root.current_screen.ids.e_mail_1.text
+        token = self.token
+        url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + e_mail + '"'
+        res = requests.get(url)
+        doc = res.json()
+        if e_mail in res.text and password in res.text:
+            data = {"e_mail":e_mail, "password":password, "token": token, "gender":doc['rows'][1]['value']['gender'],'age':doc['rows'][1]['value']['age'], 'country':doc['rows'][1]['value']['country']}
+            response = requests.post('http://admin:kolea21342@127.0.0.1:5984/sessions', json=data)
+            sm.current = "user-interface"
+        else:
+            toast('Invalid password or e-mail.')
     
+        
     def show_alert_dialog(self):      
         if not self.dialog:
             self.dialog = MDDialog(
@@ -260,6 +352,54 @@ class ReviewinApp(MDApp):
                 content_cls=Content()
             )
         self.dialog.open()
+    
+    def press(self):
+        print('pressed')
+
+
+    def logoutnew(self):
+        e_mail = self.root.get_screen('login').ids.e_mail_1.text
+        log_out_data = {"e_mail":e_mail}
+        url = 'http://127.0.0.1:2222/log_out'
+        res = requests.post(url, json=log_out_data)
+        if res.text == {"Session":"deleted"}:
+            sm.current = "login"
+        else:
+            toast('Failed to log out. Please verify your wifi connection or try again.')
+
+        
+    def log_out(self):
+        if not self.new_dialog:
+            self.new_dialog = MDDialog(
+                title= "Log out",
+                text= "Are you sure to log out ?",
+                font_size= "18",
+                font_name= "Robold",
+                type= "custom",
+                buttons = [
+                    MDFlatButton(
+                        text= "[u]Yes[/u]",
+                        text_color= [1,1,1,1],
+                        font_size= "17sp",
+                        font_name= "Popp",
+                        theme_text_color= "Custom",
+                        on_release= self.logoutnew(),
+                        md_bg_color= [0,1,0,0]
+                    ),
+                    MDFlatButton(
+                        text= "[u]No.[/u]",
+                        text_color= [1,1,1,1],
+                        font_size= "17sp",
+                        font_name="Popp",
+                        theme_text_color= "Custom",
+                        on_relase= self.newdialog.dismiss()
+                        md_bg_color= [1,0,0,0]
+                    )
+                ]
+            )
+
+
+
     
 
     def recaptcha_de_wish(self):
@@ -548,10 +688,23 @@ class ReviewinApp(MDApp):
         password_1 = str(self.root.current_screen.ids.password_1.text)
         url = 'http://127.0.0.1:8080/'
         res = requests.post()
+    
+    def load_personal_informations(self):
+        e_mail = self.root.get_screen('login').ids.e_mail_1.text
+        password = self.root.get_screen('login').ids.password_1.text
+        self.root.current_screen.ids.user_e_mail.text = e_mail
+        self.root.current_screen.ids.password2.text = password
+        url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + e_mail + '"'
+        res = requests.get(url)
+        doc = res.json()
+        gender = doc['rows'][1]['value']['gender']
+        age = doc['rows'][1]['value']['age']
+        country = doc['rows'][1]['value']['country']
+        self.root.current_screen.ids.gender_1.text = gender
+        self.root.current_screen.ids.age_1.text = age
+        self.root.current_screen.ids.country_1.text = country
 
-
-
-
+        
 #fonction de secours dont on aura surement pas besoin p
     def create_user(self):
         full_name = str(self.root.current_screen.ids.full_name.text)
@@ -605,8 +758,6 @@ class Condition(Screen):
         co = Screen()
         co = Builder.load_file('conditions.kv')
         return co
-
-
 
 
 class Accueil(Screen):
@@ -693,20 +844,5 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
