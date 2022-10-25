@@ -32,7 +32,7 @@ class UserLogin(BaseModel):
     password: str
 
 class load_(BaseModel):
-    e_mail: str
+    token: str
 
 class User_register(BaseModel):
     gender: str
@@ -113,13 +113,16 @@ async def signin(info_login: UserLogin):
     else:
         return {"Invalid":"password or e-mail"}
 
-@api.post('/load_data')
+@api.post('/load')
 async def load_(load_data: load_):
     load_data = load_data.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:2222/reviewin_users/_design/design_users/_view/login?key=' + '"' + load_data['e_mail'] + '"'
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + load_data['token'] + '"'
     res = requests.get(url)
     doc = res.json()
-    return {doc}
+    print(doc)
+    print(doc['rows'][0]['key'])
+    return doc
+
 
 
 @api.post('/check_captcha_value')
@@ -207,7 +210,8 @@ async def sessions(user_session: sessions):
         "token": user_session['token'],
         "password": user_session['password'],
         "country": doc['rows'][1]['value']['country'],
-        "age": doc['rows'][1]['value']['age']
+        "age": doc['rows'][1]['value']['age'],
+        "gender": doc['rows'][1]['value']['gender']
     }
     db.save(document)
     if db.save(document):
@@ -243,7 +247,7 @@ async def check_captcha(captcha: recaptcha):
         return {"Status":"Not Done"}
 
 
-@api.post('/log_inn')
+@api.post('/loginn')
 async def log_in(info_login: UserLogin):
     info_login = info_login.dict()
     url = 'http://admin:kolea21342@localhost:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + info_login['e_mail'] + '"'
@@ -251,12 +255,12 @@ async def log_in(info_login: UserLogin):
     document = res.text
     print(document)
     doc = res.json()
-    password = doc['rows'][1]['value']['password']
-    e_mail = doc['rows'][1]['key']
     if info_login['e_mail'] in document and info_login['password'] in document:
         return {"User":"exists"}
     else:
         return {"Status":"Not done"}
-
+@api.get('/get')
+def t():
+    return {'true'}
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2222)
