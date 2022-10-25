@@ -167,22 +167,18 @@ class ReviewinApp(MDApp):
         password = self.root.current_screen.ids.password_1.text
         token = self.token
         json_datas = {"e_mail":e_mail, "password":password}
+        json_to_load = {"e_mail":e_mail}
+        url_load = 'http://127.0.0.1:2222/load_data'
         url = 'http://127.0.0.1:2222/log-in'
-        url_db = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key="' + e_mail + '"'
+        url_session = 'http://127.0.0.1:2222/sessions'
         res = requests.post(url, json=json_datas)
-        resp = requests.get(url_db)
-        doc = resp.json()
-        password_1 = doc['rows'][1]['value']['password']
-        e_mail_1 = doc['rows'][1]['key']
-        sessions_datas = {'e_mail':e_mail, 'password':password, 'age': doc['rows'][1]['value']['age'], 'country': doc['rows'][1]['value']['country'], 'gender': doc['rows'][1]['value']['gender'], 'token':token}
+        json_session = {"e_mail":e_mail, "password":password, "token":token}
 
-        if res.text == {"User":"exists"}:
-            response = requests.post('http://127.0.0.1:5984/sessions', json=sessions_datas)
-            sm.current = 'user-interface'
-        elif res.text == {"User":"no longer exists"}:
-            toast('User no longer exists', duration=2.5)
+        if res.json() == {"User":"exists"}:
+            response = requests.post(url_session, json=json_session)
+            sm.current = "user-interface"
         else:
-            toast('Invalid password or e_mail', duration)
+            toast('Invalid password or e-mail.')
     
     def load_e_mail(self):
         text = self.root.get_screen('login').ids.e_mail_1.text
@@ -844,5 +840,3 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
-
-
