@@ -168,17 +168,21 @@ class ReviewinApp(MDApp):
         token = self.token
         json_datas = {"e_mail":e_mail, "password":password}
         json_to_load = {"e_mail":e_mail}
-        url_load = 'http://127.0.0.1:2222/load_data'
-        url = 'http://127.0.0.1:2222/log-in'
+        url_load = 'http://127.0.0.1:2222/load'
+        url = 'http://127.0.0.1:2222/loginn'
         url_session = 'http://127.0.0.1:2222/sessions'
         res = requests.post(url, json=json_datas)
         json_session = {"e_mail":e_mail, "password":password, "token":token}
 
         if res.json() == {"User":"exists"}:
+            print("User exists")
             response = requests.post(url_session, json=json_session)
             sm.current = "user-interface"
         else:
             toast('Invalid password or e-mail.')
+    
+    def tttt(self):
+        res = requests.get('http://127.0.0.1:2222/get')
     
     def load_e_mail(self):
         text = self.root.get_screen('login').ids.e_mail_1.text
@@ -380,7 +384,6 @@ class ReviewinApp(MDApp):
                         font_name= "Popp",
                         theme_text_color= "Custom",
                         on_release= self.logoutnew(),
-                        md_bg_color= [0,1,0,0]
                     ),
                     MDFlatButton(
                         text= "[u]No.[/u]",
@@ -388,8 +391,7 @@ class ReviewinApp(MDApp):
                         font_size= "17sp",
                         font_name="Popp",
                         theme_text_color= "Custom",
-                        on_relase= self.newdialog.dismiss()
-                        md_bg_color= [1,0,0,0]
+                        on_relase= self.newdialog.dismiss(),
                     )
                 ]
             )
@@ -516,6 +518,8 @@ class ReviewinApp(MDApp):
             print("bad e_mail")
         elif len(password) < 8:
             print("bad password")
+    
+
 
 
 
@@ -686,19 +690,24 @@ class ReviewinApp(MDApp):
         res = requests.post()
     
     def load_personal_informations(self):
-        e_mail = self.root.get_screen('login').ids.e_mail_1.text
-        password = self.root.get_screen('login').ids.password_1.text
+        token = self.token
+        url = 'http://127.0.0.1:2222/load'
+        json = {"token":token}
+        res = requests.post(url, json=json)
+        doc = res.json()
+        print(doc)
+        e_mail = doc['rows'][0]['value']['e_mail']
+        password = doc['rows'][0]['value']['password']
+        age = doc['rows'][0]['value']['age']
+        location = doc['rows'][0]['value']['country']
+        gender = doc['rows'][0]['value']['gender']
+        self.root.current_screen.ids.age_1.text = age
+        self.root.current_screen.ids.gender_1.text = gender
+        self.root.current_screen.ids.country_1.text = location
         self.root.current_screen.ids.user_e_mail.text = e_mail
         self.root.current_screen.ids.password2.text = password
-        url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + e_mail + '"'
-        res = requests.get(url)
-        doc = res.json()
-        gender = doc['rows'][1]['value']['gender']
-        age = doc['rows'][1]['value']['age']
-        country = doc['rows'][1]['value']['country']
-        self.root.current_screen.ids.gender_1.text = gender
-        self.root.current_screen.ids.age_1.text = age
-        self.root.current_screen.ids.country_1.text = country
+
+                
 
         
 #fonction de secours dont on aura surement pas besoin p
@@ -840,3 +849,4 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
+
