@@ -31,6 +31,9 @@ class UserLogin(BaseModel):
     e_mail: str
     password: str
 
+class logoutf(BaseModel):
+    token: str
+
 class load_(BaseModel):
     token: str
 
@@ -67,6 +70,25 @@ async def sign_up(info__: User_register):
         db.save(info__)
     else:
         {"Status":"Not done"}
+
+@api.post('/logout')
+async def logout(logout_: logoutf):
+    logout_ = logout_.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + logout_['token'] + '"'
+    response = requests.get(url)
+    doc = response.json()
+    print(doc)
+    id_ = doc['rows'][0]['id']
+    print(id_)
+    couch = couchdb.Server('http://admin:kolea21342@127.0.0.1:5984/')
+    db = couch['sessions']
+    document = '"' + id_ + '"'
+    doc = db[document]
+    db.delete(doc)
+    if db.delete(doc):
+        return {"Status":"Done"}
+    else:
+        return {"Status":"Not done"}
 
 
 @api.post('/verify_user')
@@ -219,20 +241,6 @@ async def sessions(user_session: sessions):
     else:
         return {'Status':'not done'}
 
-@api.post('/logout')
-async def logout(log_out: logout):
-    log_out = log_out.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/sessionsview?key='+'"'+ log_out['e_mail'] + '"'
-    res = requests.get(url)
-    doc = res.json()
-    doc_id = doc['rows'][1]['id']
-    url_document = 'http://admin:kolea21342@127.0.0.1:5984/sessions/' + doc_id
-    if __name__ == '__main__':
-        res = requests.delete(url_document)
-        return {"Session":"deleted"}
-    else:
-        return {"Session":"failed to delete"}
-
 
 
 @api.post('/check_captcha')
@@ -255,7 +263,7 @@ async def log_in(info_login: UserLogin):
     document = res.text
     print(document)
     doc = res.json()
-    if info_login['e_mail'] in document and info_login['password'] in document:
+    if info_login['e_mail'] in document and info_login['password'] == doc['rows'][0]['value']['password']:
         return {"User":"exists"}
     else:
         return {"Status":"Not done"}
