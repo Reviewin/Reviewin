@@ -37,9 +37,13 @@ import json
 import random2
 import random as _random
 import couchdb
+from kivy.properties import BooleanProperty
+from kivy.properties import NumericProperty
 from captcha.image import ImageCaptcha
 from kivymd.uix.list import OneLineAvatarListItem
-from kivymd.uix.fitimage import FitImage 
+from kivymd.uix.fitimage import FitImage
+from kivy.uix.recycleview import RecycleView
+from kivy.app import App
 pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
 #fonts
@@ -54,64 +58,39 @@ LabelBase.register(name="Robold,", fn_regular="Robold.ttf")
 
 Window.size = (360,800)
  
+Builder.load_string('''
+<RV>:
+    viewclass: 'Label'
+    RecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
+''')
 
-KV = '''
-<Content>
-    orientation: "vertical"
-    spacing: "12dp"
-    size_hint_y: None
-    height: "120dp"
+class RV(RecycleView):
+    def __init__(self, **kwargs):
+        super(RV, self).__init__(**kwargs)
+        self.data = [{'text': str(x)} for x in range(10)]
 
-    MDTextField:
-        id: "captcha"
-        hint_text: "Persistent helper text"
-        helper_text: "Text is always here"
-        helper_text_mode: "persistent"
-    AsyncImage:
-        source: 'http://127.0.0.1:2222/captcha'
-        size_hint: (0.5, 0.3)
-    Button:
-        text: "Submit"
-        font_size: "20sp"
-        font_name: "OpenSans"
-        pos_hint: {'center_x': 0.8, 'center_y': 0.8}
-        halign: 'right'
-        theme_text_color: 'Custom'
-        text_color: 1,1,1,1
-        size_hint: (0.15, 0.007)
-        background_color: 41/255, 34/255, 34/255, 1
-        background_normal: ''
+class RVE(RecycleView):
+    def __init__(self, **kwargs):
+        super(RVE, self).__init__(**kwargs)
+        self.data =  [{'source': 'rQtlxvS.png', 'size_hint_y':'5'} for x in range(10)]
         
-'''
-
-
-
-class Content(BoxLayout):
-    def build(self):
-        return Builder.load_string(KV)
-
-
 
 #principale classe de l'application
 class ReviewinApp(MDApp):
     new_dialog = None
-    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    a = _random.choice(ac)
-    b = _random.choice(ac)
-    c = _random.choice(ac)
-    d = _random.choice(ac)
-    f = _random.choice(ac)
-    g = _random.choice(ac)
-    h = _random.choice(ac)
-    token = a + b + c + d + f + g + h
     notdialog = None
     dialog =None
     dialoge = None
     asyncimage = None
+    data = ListProperty([{'text':str(i)} for i in range(20)])
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
-        self.theme_cls.theme_style = "Light"
         global sm 
         sm = ScreenManager()
         sm.add_widget(Builder.load_file("splash.kv"))
@@ -127,17 +106,21 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file("recaptcha.kv"))
         sm.add_widget(Builder.load_file("contact_true.kv"))
         sm.add_widget(Builder.load_file('myinfo.kv'))
-        sm.add_widget(Builder.load_file('sign_in_1.kv'))
+        sm.add_widget(Builder.load_file('test.kv'))
         return sm
+    
 
     def return_async(self):
         if not self.asyncimage:
             self.asyncimage = AsyncImage(
-                source="http://127.0.0.1:2222/captcha",
+                source="http://127.0.0.1:2223/captcha",
                 size_hint_y= None
             )
         self.asyncimage.open()
-    
+
+
+
+
     def test_token(self):
         print(self.token)
 
@@ -159,18 +142,44 @@ class ReviewinApp(MDApp):
         self.dialog.open()
     
     def test_entering(self):
-        res = requests.get('http://127.0.0.1:2222/ver')
+        res = requests.get('http://127.0.0.1:2223/ver')
         print(res)
     
     def login__(self):
         e_mail = self.root.current_screen.ids.e_mail_1.text
         password = self.root.current_screen.ids.password_1.text
-        token = self.token
+        ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+        a = _random.choice(ac)
+        b = _random.choice(ac)
+        c = _random.choice(ac)
+        d = _random.choice(ac)
+        f = _random.choice(ac)
+        g = _random.choice(ac)
+        h = _random.choice(ac)
+        i = _random.choice(ac)
+        j = _random.choice(ac)
+        k = _random.choice(ac)
+        l = _random.choice(ac)
+        m = _random.choice(ac)
+        n = _random.choice(ac)
+        o = _random.choice(ac)
+        p = _random.choice(ac)
+        q = _random.choice(ac)
+        r = _random.choice(ac)
+        s = _random.choice(ac)
+        t = _random.choice(ac)
+        u = _random.choice(ac)
+        v = _random.choice(ac)
+        w = _random.choice(ac)
+        x = _random.choice(ac)
+        y = _random.choice(ac)
+        z = _random.choice(ac)
+        token = a + b + c + d + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
         json_datas = {"e_mail":e_mail, "password":password}
         json_to_load = {"e_mail":e_mail}
-        url_load = 'http://127.0.0.1:2222/load'
-        url = 'http://127.0.0.1:2222/loginn'
-        url_session = 'http://127.0.0.1:2222/sessions'
+        url_load = 'http://127.0.0.1:2223/load'
+        url = 'http://127.0.0.1:2223/loginn'
+        url_session = 'http://127.0.0.1:2223/sessions'
         res = requests.post(url, json=json_datas)
         json_session = {"e_mail":e_mail, "password":password, "token":token}
 
@@ -182,7 +191,7 @@ class ReviewinApp(MDApp):
             toast('Invalid password or e-mail.')
     
     def tttt(self):
-        res = requests.get('http://127.0.0.1:2222/get')
+        res = requests.get('http://127.0.0.1:2223/get')
     
     def load_e_mail(self):
         text = self.root.get_screen('login').ids.e_mail_1.text
@@ -221,7 +230,6 @@ class ReviewinApp(MDApp):
         self.dialog.open()
 
 
-
     def recaptcha__(self):
         age = self.root.get_screen('register').ids.age.text
         e_mail = self.root.get_screen('register').ids.e_mail.text
@@ -231,9 +239,9 @@ class ReviewinApp(MDApp):
         recaptcha_value = self.root.current_screen.ids.recaptcha.text
         points = 0
 
-        url = 'http://127.0.0.1:2222/verify_captcha'
-        url_verify = 'http://127.0.0.1:2222/verify_user'
-        url_register = 'http://127.0.0.1:2222/reviewin_users'
+        url = 'http://127.0.0.1:2223/verify_captcha'
+        url_verify = 'http://127.0.0.1:2223/verify_user'
+        url_register = 'http://127.0.0.1:2223/reviewin_users'
         payload = {"captcha_value":recaptcha_value}
         print(payload)
         user_data = {"gender":gender, "age":age, "country":country,"e_mail":e_mail, "password":password, "points":points} 
@@ -358,12 +366,14 @@ class ReviewinApp(MDApp):
 
 
     def logoutnew(self):
-        e_mail = self.root.get_screen('login').ids.e_mail_1.text
-        log_out_data = {"e_mail":e_mail}
-        url = 'http://127.0.0.1:2222/log_out'
+        token = self.token
+        log_out_data = {"token":token}
+        url = 'http://127.0.0.1:2223/logout'
         res = requests.post(url, json=log_out_data)
-        if res.text == {"Session":"deleted"}:
+        print(res.text)
+        if res.text == {"Status":"Done"}:
             sm.current = "login"
+            toast('Successfully logged out.')
         else:
             toast('Failed to log out. Please verify your wifi connection or try again.')
 
@@ -401,7 +411,7 @@ class ReviewinApp(MDApp):
     
 
     def recaptcha_de_wish(self):
-        url = 'http://127.0.0.1:2222/captcha'
+        url = 'http://127.0.0.1:2223/captcha'
         if not self.dialog:
             self.dialog = MDDialog(
                 title= "Recaptcha",
@@ -416,7 +426,7 @@ class ReviewinApp(MDApp):
                     )
                 ],
                 content_cls= AsyncImage(
-                    source= 'http://127.0.0.1:2222/captcha',
+                    source= 'http://127.0.0.1:2223/captcha',
                     size_hint_y= None,
                     ),
                 )
@@ -473,7 +483,7 @@ class ReviewinApp(MDApp):
     def on_enter_show_recaptcha(self):
         if not self.asyncimage:
             self.asyncimage = AsyncImage(
-                source= 'http://127.0.0.1:2222/captcha',
+                source= 'http://127.0.0.1:2223/captcha',
                 size_hint_y= None
             )
         self.asyncimage.texture_update()
@@ -491,7 +501,7 @@ class ReviewinApp(MDApp):
         list_verify = [0,1,2,3]
         list_test = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
 
-        if str(age) not in list_test and len(country) not in list_verify and re.search(pattern_verify, e_mail) and len(password) > 8 and gender == "M"or gender == "F":
+        if int(str(age)) > 16 and len(country) not in list_verify and re.search(pattern_verify, e_mail) and len(password) > 8 and gender == "M"or gender == "F":
             sm.current = "recaptcha"
         else:
             toast("Please check your informations while signing up.")
@@ -678,7 +688,7 @@ class ReviewinApp(MDApp):
         data_e_mail = json.dumps(str(e_mail))
 
         #requete post/signup à l'endpoint de l'API.
-        url = 'http://127.0.0.1:2222/user'
+        url = 'http://127.0.0.1:2223/user'
         data = {'full_name':json.dumps(full_name), 'age':json.dumps(age), 'country':json.dumps(country), 'e_mail':json.dumps(e_mail), 'gender':json.dumps(gender), 'password':json.dumps(password)}
         response = requests.post(url, json=data)
 
@@ -691,7 +701,7 @@ class ReviewinApp(MDApp):
     
     def load_personal_informations(self):
         token = self.token
-        url = 'http://127.0.0.1:2222/load'
+        url = 'http://127.0.0.1:2223/load'
         json = {"token":token}
         res = requests.post(url, json=json)
         doc = res.json()
@@ -845,8 +855,5 @@ class Recaptcha(Screen):
         rec = Builder.load_file("recaptcha.kv")
         return rec
 
-
-
 if __name__=="__main__":
     ReviewinApp().run()
-
