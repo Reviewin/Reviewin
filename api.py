@@ -1,8 +1,9 @@
-from fastapi import FastAPI 
+from fastapi import FastAPI, UploadFile, File, responses
 import uvicorn
 from typing import Union
 from pydantic import BaseModel
 from typing import Optional
+import shutil
 import couchdb
 import requests
 import json
@@ -15,9 +16,16 @@ import fastapi.responses as _responses
 import random as _random
 import captcha 
 from captcha.image import ImageCaptcha
-
+from deta import Drive
+import os
+from PIL import Image
+from deta import Deta 
+from deta import Drive
+import aiofiles
+import os
 
 api = FastAPI() #on instancie 
+
 
 class logout(BaseModel):
     e_mail: str
@@ -61,13 +69,39 @@ class user__(BaseModel):
 class Recaptcha_2(BaseModel):
     captcha_value: str
 
+
 @api.post('/products')
-async def create_file(file: UploadFile = File(...)):
-      file2store = await file.read()
-      with open(r"P:\tg1") as f:
-          f.write(file2store)
-          return {"Done"}        
-    
+async def image(file: UploadFile = File(...)):
+    ac ['0','1','2','3', '4', '5', '6', '7', '8', '9']
+    a = _random.choice(ac)
+    b = _random.choice(ac)
+    c = _random.choice(ac)
+    d = _random.choice(ac)
+    e = _random.choice(ac)
+    f = _random.choice(ac)
+    g = _random.choice(ac)
+    h = _random.choice(ac)
+    i = _random.choice(ac)
+    j = _random.choice(ac)
+    random_id = a  + b + c + d + e + f + g + h + i + j + '.png'
+    await file.read
+    file_path = str(os.getcwd) + str(random_id)
+    with open(file_path) as f:
+        f.write(file)
+    if f.write(file):
+        return {"Status":"Done"}
+    else:
+        return {"Status":"Not done"}
+
+
+@api.get('/products/{id_}')
+async def get_produtcts(id_: int):
+    image = str(id_) + '.png'
+    return _responses.FileResponse(image)
+
+
+
+
 @api.post('/reviewin_users')
 async def sign_up(info__: User_register):
     info__ = info__.dict()
@@ -77,6 +111,7 @@ async def sign_up(info__: User_register):
         db.save(info__)
     else:
         {"Status":"Not done"}
+
 
 @api.post('/logout')
 async def logout(logout_: logoutf):
@@ -88,11 +123,9 @@ async def logout(logout_: logoutf):
     id_ = doc['rows'][0]['id']
     print(id_)
     couch = couchdb.Server('http://admin:kolea21342@127.0.0.1:5984/')
-    db = couch['sessions']
-    document = '"' + id_ + '"'
-    doc = db[document]
-    db.delete(doc)
-    if db.delete(doc):
+    db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
+    db.delete(db[str(id_)])
+    if db.delete(db[str(id_)]):
         return {"Status":"Done"}
     else:
         return {"Status":"Not done"}
@@ -127,7 +160,6 @@ async def verify_captcha_test(captcha: Recaptcha_2):
         return {"Not good captcha":"don't let sign up"}
 
 
-
 @api.post('/log-in')
 async def signin(info_login: UserLogin):
     info_login = info_login.dict()
@@ -142,6 +174,7 @@ async def signin(info_login: UserLogin):
     else:
         return {"Invalid":"password or e-mail"}
 
+
 @api.post('/load')
 async def load_(load_data: load_):
     load_data = load_data.dict()
@@ -153,7 +186,6 @@ async def load_(load_data: load_):
     return doc
 
 
-
 @api.post('/check_captcha_value')
 async def test(captcha: recaptcha):
     captcha = captcha.dict()
@@ -163,7 +195,8 @@ async def test(captcha: recaptcha):
         return {"Status":"Done"}
     else:
         return {"Status":"Not Done"}
-'"'
+
+
 @api.post('/abc')
 async def captcha(info_captcha: Recaptcha_2):
     info_captcha = info_captcha.dict()
@@ -174,6 +207,7 @@ async def captcha(info_captcha: Recaptcha_2):
     else:
         return {"Status":"Captcha invalid"}
 
+
 @api.post('/check')
 async def something():
     res = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
@@ -181,6 +215,7 @@ async def something():
         return {"Status":"Done"}
     else:
         return {"Status":"Not Done"}
+
 
 @api.post('/users')
 async def test_verification(info_user: User_register):
@@ -193,6 +228,7 @@ async def test_verification(info_user: User_register):
     else:
         db.save(info_user)
 
+
 @api.post('/verification_user')
 async def verification(verification_: verification):
     verification_ = verification.dict()
@@ -200,7 +236,6 @@ async def verification(verification_: verification):
         return {"User":"exists"}
     else:
         return {"User":"No longer exists"}
-
 
 
 @api.get('/captcha')
@@ -249,7 +284,6 @@ async def sessions(user_session: sessions):
         return {'Status':'not done'}
 
 
-
 @api.post('/check_captcha')
 async def check_captcha(captcha: recaptcha):
     captcha = captcha.dict()
@@ -274,8 +308,13 @@ async def log_in(info_login: UserLogin):
         return {"User":"exists"}
     else:
         return {"Status":"Not done"}
+
+
 @api.get('/get')
 def t():
     return {'true'}
+
+
 if __name__ == '__main__':
-    uvicorn.run(api, host= '127.0.0.1', port= 2222)
+    uvicorn.run(api, host= '127.0.0.1', port= 2223)
+
