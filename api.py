@@ -61,6 +61,13 @@ class user__(BaseModel):
 class Recaptcha_2(BaseModel):
     captcha_value: str
 
+@api.post('/products')
+async def create_file(file: UploadFile = File(...)):
+      file2store = await file.read()
+      with open(r"P:\tg1") as f:
+          f.write(file2store)
+          return {"Done"}        
+    
 @api.post('/reviewin_users')
 async def sign_up(info__: User_register):
     info__ = info__.dict()
