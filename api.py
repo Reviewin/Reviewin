@@ -70,9 +70,13 @@ class Recaptcha_2(BaseModel):
     captcha_value: str
 
 
-@api.post('/products')
-async def image(file: UploadFile = File(...)):
-    ac ['0','1','2','3', '4', '5', '6', '7', '8', '9']
+
+
+
+
+@api.post("/products")
+async def create_upload_file(file: UploadFile = File(...)):
+    ac =  ['0','1','2','3', '4', '5', '6', '7', '8', '9']
     a = _random.choice(ac)
     b = _random.choice(ac)
     c = _random.choice(ac)
@@ -84,15 +88,12 @@ async def image(file: UploadFile = File(...)):
     i = _random.choice(ac)
     j = _random.choice(ac)
     random_id = a  + b + c + d + e + f + g + h + i + j + '.png'
-    await file.read
-    file.filemname = random_id
-    file_path = r'C:\Users\33769\Desktop\Reviewin'
-    with open(file_path) as f:
-        f.write(file)
-    if f.write(file):
-        return {"Status":"Done"}
-    else:
-        return {"Status":"Not done"}
+    file.filename = random_id
+    file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
+    with open(file_location, "wb+") as file_object:
+        file_object.write(file.file.read())
+    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+
 
 
 @api.get('/products/{id_}')
