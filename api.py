@@ -85,7 +85,8 @@ async def image(file: UploadFile = File(...)):
     j = _random.choice(ac)
     random_id = a  + b + c + d + e + f + g + h + i + j + '.png'
     await file.read
-    file_path = str(os.getcwd) + str(random_id)
+    file.filemname = random_id
+    file_path = r'C:\Users\33769\Desktop\Reviewin'
     with open(file_path) as f:
         f.write(file)
     if f.write(file):
