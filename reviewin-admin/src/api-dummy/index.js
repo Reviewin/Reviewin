@@ -67,11 +67,38 @@ class ReviewinClient {
 		const products = [
 			{
 				id: 1287288,
-				name: "Lorem ipsum dolor sit amet"
+				name: "racism ender",
+				images: [
+					{"url": "https://picsum.photos/id/22/367/267"}
+				]
 			},
 			{
 				id: 3850275,
-				name: "Consectetur adispicing eit"
+				name: "gromit mug",
+				images: [
+					{"url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages-na.ssl-images-amazon.com%2Fimages%2FI%2F71fS2SBKk4L._AC_SL1500_.jpg&f=1&nofb=1&ipt=99dff3fd7fcf8fc7dde39489a6e7e461660376cad6a0e8a8915e65c7d564a9f8&ipo=images"}
+				]
+			},
+			{
+				id: 4637284,
+				name: "plateauschuhe aquarium",
+				images: [
+					{"url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.GuDZndfp01q2APCRyfoz4QHaHa%26pid%3DApi&f=1&ipt=caa3ed582c934561f225b096dfc40cf19581c80935688f0ff367e7815ba87515&ipo=images"}
+				]
+			},
+			{
+				id: 7465923,
+				name: "plateauschuhe aquarium",
+				images: [
+					{"url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.GuDZndfp01q2APCRyfoz4QHaHa%26pid%3DApi&f=1&ipt=caa3ed582c934561f225b096dfc40cf19581c80935688f0ff367e7815ba87515&ipo=images"}
+				]
+			},
+			{
+				id: 1284572,
+				name: "plateauschuhe aquarium",
+				images: [
+					{"url": "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%3Fid%3DOIP.GuDZndfp01q2APCRyfoz4QHaHa%26pid%3DApi&f=1&ipt=caa3ed582c934561f225b096dfc40cf19581c80935688f0ff367e7815ba87515&ipo=images"}
+				]
 			}
 		]
 		this.getSession().then((session) => {
