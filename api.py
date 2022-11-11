@@ -99,16 +99,28 @@ async def get_produtcts(id_: int):
 
 
 
-
 @api.post('/reviewin_users')
 async def sign_up(info__: User_register):
     info__ = info__.dict()
+    user_e_mail = info__['e_mail']
+    url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
-    if len(info__['password']) > 8 and info__['points'] == 0:
-        print("User registered")
-        db.save(info__)
+    res = requests.get(url)
+
+    if user_e_mail not in res.json():
+        if len(info__['password']) > 8 and info__['points'] == 0:
+            print("User registered")
+            db.save(info__)
+            return {"User":"Saved"}
+            if db.save(info__):
+                print('user registered')
+                return {"User":"registered"}
+            else:
+                return {"User":"not registered"}
+        else:
+            return {"Password":"Not valid"}
     else:
-        {"Status":"Not done"}
+        return {"Status":"Not done"}
 
 
 @api.post('/logout')
@@ -129,19 +141,7 @@ async def logout(logout_: logoutf):
         return {"Status":"Not done"}
 
 
-@api.post('/verify_user')
-async def verify_user(user_verif :user__):
-    user_verif = user_verif.dict()
-    user_e_mail = user_verif['e_mail']
-    url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
-    res = requests.get(url)
-    print(url)
-    print(res.text)
-    if str(user_e_mail) in res.text:
-        print('User exists')
-        return {"User":"exists"}
-    else:
-        return {"User":'no longer exists'}
+
 
 
 @api.post('/verify_captcha')
