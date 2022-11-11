@@ -2,7 +2,7 @@ import { Component, Fragment, h } from 'preact';
 
 import { Button, Flex, Heading, Link, Spacer } from "@chakra-ui/react";
 
-class ProductList extends Component {
+class ProductListPage extends Component {
     constructor() {
         super();
         this.state = {products: []}
@@ -42,4 +42,4 @@ class ProductList extends Component {
     }
 }
 
-export default ProductList;
+export default ProductListPage;

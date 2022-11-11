@@ -9,7 +9,7 @@ const theme = extendTheme({
 
 // Code-splitting is automated for `routes` directory
 import Entrance from "../routes/entrance";
-import Main from "../routes/main";
+import LoggedInWrapper from "../routes/logged-in-wrapper";
 import Login from "../routes/login";
 
 const App = () => (
@@ -18,7 +18,7 @@ const App = () => (
 			{/*<Header />*/}
 			<Router>
 				<Entrance path="/" />
-				<Main path="/:r*"></Main>
+				<LoggedInWrapper path="/:r*"></LoggedInWrapper>
 				<Login path="/login/" />
 			</Router>
 		</div>

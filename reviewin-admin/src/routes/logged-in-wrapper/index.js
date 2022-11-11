@@ -1,7 +1,7 @@
 import { Component, Fragment, h } from 'preact';
 
 import MainNav from "../../components/main-nav"
-import ProductList from "../product-list";
+import ProductListPage from "../product-list-page";
 import GiftList from "../gift-list";
 import UserSettings from "../user-settings";
 
@@ -9,18 +9,10 @@ import { Flex } from '@chakra-ui/react';
 import { Router, route } from 'preact-router';
 //import { Link as MatchLink } from 'preact-router/match';
 
-class Main extends Component {
+class LoggedInWrapper extends Component {
     constructor() {
         super();
         this.state = { session: {} }
-    }
-
-    handleLogOut() {
-        //window.localStorage.removeItem("role")
-        window.rvwnClient.logOut()
-        .then(() => {
-            route("/", true)
-        })
     }
 
     componentDidMount() {
@@ -38,7 +30,7 @@ class Main extends Component {
             <MainNav session={this.state.session} />
             <Flex as="main" marginTop="3em" w="100%">
                 <Router>
-                    <ProductList path="/products/" />
+                    <ProductListPage path="/products/" />
                     <GiftList path="/gifts/" />
                     <UserSettings path="/settings/" />
                 </Router>
@@ -48,4 +40,4 @@ class Main extends Component {
     }
 }
 
-export default Main;
+export default LoggedInWrapper;
