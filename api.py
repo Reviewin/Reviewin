@@ -70,10 +70,6 @@ class Recaptcha_2(BaseModel):
     captcha_value: str
 
 
-
-
-
-
 @api.post("/products")
 async def create_upload_file(file: UploadFile = File(...)):
     ac =  ['0','1','2','3', '4', '5', '6', '7', '8', '9']
@@ -162,19 +158,6 @@ async def verify_captcha_test(captcha: Recaptcha_2):
         return {"Not good captcha":"don't let sign up"}
 
 
-@api.post('/log-in')
-async def signin(info_login: UserLogin):
-    info_login = info_login.dict()
-    info_e_mail = info_login['e_mail']
-    info_password = info_login['password']
-    url = 'http://admin:kolea21342@127.0.0.1:2222/reviewin_users/_design/design_users/_view/login?key=' + '"' + info_e_mail + '"'
-    res = requests.get(url)
-    print(res.json())
-    doc = res.json()
-    if info_e_mail in res.json() and info_password in res.json():
-        return {"User":"exists"}
-    else:
-        return {"Invalid":"password or e-mail"}
 
 
 @api.post('/load')
@@ -188,37 +171,6 @@ async def load_(load_data: load_):
     return doc
 
 
-@api.post('/check_captcha_value')
-async def test(captcha: recaptcha):
-    captcha = captcha.dict()
-    url = 'http://admin:kolea21342@localhost:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key='+'"'+str(captcha['captcha_value'])+'"' 
-    res = requests.get(url)
-    if captcha['captcha'] in res.json():
-        return {"Status":"Done"}
-    else:
-        return {"Status":"Not Done"}
-
-
-@api.post('/abc')
-async def captcha(info_captcha: Recaptcha_2):
-    info_captcha = info_captcha.dict()
-    url = 'http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true'
-    res = requests.get(url)
-    if info_captcha['recaptcha_2'] in res.text:
-        return {"Status":"Checked"}
-    else:
-        return {"Status":"Captcha invalid"}
-
-
-@api.post('/check')
-async def something():
-    res = requests.get('http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true')
-    if {"ca"} in res.text:
-        return {"Status":"Done"}
-    else:
-        return {"Status":"Not Done"}
-
-
 @api.post('/users')
 async def test_verification(info_user: User_register):
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users/')
@@ -230,14 +182,6 @@ async def test_verification(info_user: User_register):
     else:
         db.save(info_user)
 
-
-@api.post('/verification_user')
-async def verification(verification_: verification):
-    verification_ = verification.dict()
-    if verification_['e_mail'] in requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true').text:
-        return {"User":"exists"}
-    else:
-        return {"User":"No longer exists"}
 
 
 @api.get('/captcha')
@@ -286,17 +230,6 @@ async def sessions(user_session: sessions):
         return {'Status':'not done'}
 
 
-@api.post('/check_captcha')
-async def check_captcha(captcha: recaptcha):
-    captcha = captcha.dict()
-    url = 'http://admin:kolea21342@localhost:5984/captcha_test/_all_docs?include_docs=true'
-    res = requests.get(url)
-    print(res.text)
-    if captcha['input_'] in res.text:
-        return {"Status":"Captcha passed"}
-    else:
-        return {"Status":"Not Done"}
-
 
 @api.post('/loginn')
 async def log_in(info_login: UserLogin):
@@ -311,10 +244,6 @@ async def log_in(info_login: UserLogin):
     else:
         return {"Status":"Not done"}
 
-
-@api.get('/get')
-def t():
-    return {'true'}
 
 
 if __name__ == '__main__':
