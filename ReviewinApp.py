@@ -1,5 +1,3 @@
-
-#testduwebhook
 from cProfile import run
 from math import fabs
 from os import access
@@ -45,6 +43,7 @@ from captcha.image import ImageCaptcha
 from kivymd.uix.list import OneLineAvatarListItem
 from kivymd.uix.fitimage import FitImage
 from kivy.uix.recycleview import RecycleView
+from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.app import App
 pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
@@ -74,12 +73,15 @@ Builder.load_string('''
 class RV(RecycleView):
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        self.data = [{'text': str(x)} for x in range(10)]
+        self.data = [{'text': str('teeeeeeeeeeee')} for x in range(10)]
+        self.data_ = [{'font_name':"Popp"}]
 
-class RVE(RecycleView):
+class RVE(RecycleBoxLayout):
     def __init__(self, **kwargs):
         super(RVE, self).__init__(**kwargs)
-        self.data =  [{'source': 'rQtlxvS.png', 'size_hint_y':'5'} for x in range(10)]
+        self.data = [{
+            'name.source':str(1) + '.png'
+        } for x in range(10) ]
         
 
 #principale classe de l'application
@@ -89,7 +91,7 @@ class ReviewinApp(MDApp):
     dialog =None
     dialoge = None
     asyncimage = None
-    data = ListProperty([{'text':str(i)} for i in range(20)])
+    data = ListProperty([{'source':str(i) + str('.png')} for i in range(10)])
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
@@ -242,20 +244,19 @@ class ReviewinApp(MDApp):
         points = 0
 
         url = 'http://127.0.0.1:2223/verify_captcha'
-        url_verify = 'http://127.0.0.1:2223/verify_user'
         url_register = 'http://127.0.0.1:2223/reviewin_users'
         payload = {"captcha_value":recaptcha_value}
         print(payload)
         user_data = {"gender":gender, "age":age, "country":country,"e_mail":e_mail, "password":password, "points":points} 
         res =  requests.post(url, json=payload)
+        resp = requests.post(url_register, json=user_data)
         e_mail_1 = {"e_mail":e_mail}
-        resp = requests.post(url_verify, json=e_mail_1)
 
-        if res.json() == {"Captcha":"good"} and resp.json() == {"User":"no longer exists"}:
-            response = requests.post(url_register, json=user_data)
+        if res.json() == {"Captcha":"good"} and resp.json() == {"User":"registered"}:
+            toast('Registered successfully', duration= 2.5)
             sm.current = "login"
             print('User registered')
-        elif res.json() != {"Captcha":"good"} and resp.text == {"user":"no longer exist"}:
+        elif res.json() != {"Captcha":"good"} and resp.text == {"User":"registered"}:
             toast("Invalid captcha value.")
         else:
             toast("E-mail already used.", duration=3)
@@ -859,3 +860,8 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
+
+
+
+
+
