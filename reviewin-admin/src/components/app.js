@@ -7,7 +7,6 @@ const theme = extendTheme({
 	
 })
 
-import Header from './header';
 // Code-splitting is automated for `routes` directory
 import Entrance from "../routes/entrance";
 import Main from "../routes/main";
