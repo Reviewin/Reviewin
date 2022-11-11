@@ -1,6 +1,6 @@
 import { Component, Fragment, h } from 'preact';
 
-import { Heading } from "@chakra-ui/react";
+import { Button, Flex, Heading, Link, Spacer } from "@chakra-ui/react";
 
 class ProductList extends Component {
     constructor() {
@@ -25,12 +25,19 @@ class ProductList extends Component {
         ))
 
         return (
-            <>
-                <Heading as="h2">Manage your products</Heading>
+            <Flex direction="column" w="100%">
+                <Flex w="100%" align="center" p="4">
+                    <Heading as="h2" size="md">Manage your products</Heading>
+                    <Link href="/products/new" ml="auto">
+                    	{/* tabindex="-1" allows only the Link to be reached by keyboard navigation */}
+                        <Button colorScheme="gray" tabindex="-1">Submit new product</Button>
+                    </Link>
+                </Flex>
+                <br />
                 <ol>
                     {list}
                 </ol>
-            </>
+            </Flex>
         )
     }
 }
