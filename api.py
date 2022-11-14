@@ -91,12 +91,17 @@ async def create_upload_file(file: UploadFile = File(...)):
     return {"info": f"file '{file.filename}' saved at '{file_location}'"}
 
 
-
 @api.get('/products/{id_}')
 async def get_produtcts(id_: int):
     image = str(id_) + '.png'
     return _responses.FileResponse(image)
 
+@api.get('/products')
+async def list_products():
+    path = "C:/Users/33769/Desktop/Reviewin"
+    valid_extension = '.png'
+    files = os.listdir(path)
+    return files
 
 
 @api.post('/reviewin_users')
@@ -141,9 +146,6 @@ async def logout(logout_: logoutf):
         return {"Status":"Not done"}
 
 
-
-
-
 @api.post('/verify_captcha')
 async def verify_captcha_test(captcha: Recaptcha_2):
     captcha = captcha.dict()
@@ -156,8 +158,6 @@ async def verify_captcha_test(captcha: Recaptcha_2):
         return {"Captcha":"good"}
     else:
         return {"Not good captcha":"don't let sign up"}
-
-
 
 
 @api.post('/load')
@@ -181,7 +181,6 @@ async def test_verification(info_user: User_register):
         return {"e_mail":"already used"}
     else:
         db.save(info_user)
-
 
 
 @api.get('/captcha')
