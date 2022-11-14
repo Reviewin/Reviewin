@@ -70,11 +70,6 @@ Builder.load_string('''
         orientation: 'vertical'
 ''')
 
-class RV(RecycleView):
-    def __init__(self, **kwargs):
-        super(RV, self).__init__(**kwargs)
-        self.data = [{'text': str('teeeeeeeeeeee')} for x in range(10)]
-        self.data_ = [{'font_name':"Popp"}]
 
 class RVE(RecycleBoxLayout):
     def __init__(self, **kwargs):
@@ -82,7 +77,15 @@ class RVE(RecycleBoxLayout):
         self.data = [{
             'name.source':str(1) + '.png'
         } for x in range(10) ]
-        
+
+
+class RV(RecycleView):
+    def __init__(self, **kwargs):
+        super(RV, self).__init__(**kwargs)
+        self.data = [{'text': str('teeeeeeeeeeee')} for x in range(10)]
+        self.data_ = [{'font_name':"Popp"}]
+
+
 
 #principale classe de l'application
 class ReviewinApp(MDApp):
@@ -91,10 +94,14 @@ class ReviewinApp(MDApp):
     dialog =None
     dialoge = None
     asyncimage = None
-    data = ListProperty([{'source':str(i) + str('.png')} for i in range(10)])
+    doc = None
+    data = ListProperty()
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
+        res = requests.get('http://127.0.0.1:2223/products')
+        self.doc = res.json()
+        self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
         global sm 
         sm = ScreenManager()
         sm.add_widget(Builder.load_file("splash.kv"))
