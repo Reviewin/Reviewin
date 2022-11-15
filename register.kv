@@ -3,51 +3,27 @@ MDScreen:
     MDFloatLayout:
         md_bg_color: 41/255, 34/255, 34/255, 1
         MDLabel:
-            text: "Happy to see you here !"
-            text_color: 1,1,1,1
-            pos_hint: {'center_x':0.55, 'center_y':0.95}
-            halign: 'center'
-            theme_text_color: 'Custom'
-            font_size: "24sp"
-            font_name: "Inter"
-        MDLabel:
-            text: "Before beggining, just create an account..."
-            text_color: 1,1,1,1
-            pos_hint: {'center_x':0.5, 'center_y':0.90}
-            halign: 'center'
-            theme_text_color:'Custom'
-            font_size: "16sp"
-            font_name: "Inter"
-        MDLabel:
-            text: "We are waiting for you..."
+            text: "Join Reviewin today."
             text_color: 1,1,1,1
             pos_hint: {'center_x':0.5, 'center_y':0.85}
             halign: 'center'
             theme_text_color: 'Custom'
-            font_size: "18sp"
+            font_size: "20sp"
+            font_name: "Popp"
+        MDLabel:
+            text:"Already have an account ?"
+            text_color: 1,1,1,1
+            pos_hint: {'center_x':0.42, 'center_y':0.81}
+            halign: 'center'
+            theme_text_color: 'Custom'
             font_name: "Inter"
-        MDLabel:
-            text: "Register"
-            text_color: 1,1,1,1
-            pos_hint: {'center_x':0.5, 'center_y':0.8}
-            halign: 'center'
-            theme_text_color: 'Custom'
-            font_size: "24sp"
-            font_name:"OpenSans"
-        MDLabel:
-            text:"or"
-            text_color: 1,1,1,1
-            pos_hint: {'center_x':0.44, 'center_y':0.77}
-            halign: 'center'
-            theme_text_color: 'Custom'
-            font_name: "OpenSans"
-            font_size: "18sp"
+            font_size: "13sp"
         Button:
             text: "[u]login[/u]"
             markup: True
-            font_size: "20sp"
+            font_size: "13sp"
             font_name: "OpenSans"
-            pos_hint: {'center_x': 0.55, 'center_y': 0.77}
+            pos_hint: {'center_x': 0.73, 'center_y': 0.81}
             halign: 'center'
             theme_text_color: 'Custom'
             text_color: 1,1,1,1
@@ -56,83 +32,78 @@ MDScreen:
             background_color: 41/255, 34/255, 34/255, 1
             background_normal: ''
             on_press: app.root.current = "login"
-        MDTextFieldRound:
-            id:full_name
-            text: ""
-            hint_text: "Full Name"
-            size_hint_x:  None
-            size_hint_y: 0.08
-            width: 247
-            font_size: 18
-            pos_hint: {'center_x':0.5, 'center_y':0.7}
-        MDTextFieldRound:
+        MDTextField:
+            hint_text: "example@domain.com"
+            mode:"round"
             icon_right: "email"
-            id: e_mail
+            id:e_mail
             hint_text: "E-Mail"
             size_hint_x:  None
             size_hint_y: 0.08
             width: 247
             font_size: 18
-            pos_hint: {'center_x':0.5, 'center_y':0.6}
-        MDTextFieldRound:
-            id: address
-            hint_text: "Address"
+            pos_hint: {'center_x':0.5, 'center_y':0.7}
+            background_color: 1,1,1,0
+        MDTextField:
+            id:country
+            icon_right: 'pin'
+            mode:"round"
+            hint_text: "Country where you leave."
             size_hint_x: None
             size_hint_y: 0.08
             width: 247
             font_size: 18
-            pos_hint: {'center_x':0.5, 'center_y':0.5}
-        MDTextFieldRound:
-            id: age
+            pos_hint: {'center_x':0.5, 'center_y':0.6}
+        MDTextField:
+            id:age
+            icon_right: 'help'
             hint_text: "Age"
+            mode:"round"
             size_hint_x: None
             size_hint_y: 0.08
             input_filter: 'int'
             width: 247
             font_size: 18
-            pos_hint: {'center_x':0.5, 'center_y':0.4}
-        MDTextFieldRound:
-            icon_left: 'key-variant'
-            icon_right: 'eye-off'
-            id: password
+            pos_hint: {'center_x':0.5, 'center_y':0.5}
+        MDTextField:
+            icon_right: 'key-variant'
+            mode:"round"
+            id:password
             hint_text: "Password"
             size_hint_x: None
             size_hint_y: 0.08
             width: 247
             font_size: 18
-            pos_hint: {'center_x':0.5, 'center_y':0.3}
-        MDTextFieldRound:
-            id: gender
-            hint_text: "MALE OR FEMALE"
+            pos_hint: {'center_x':0.5, 'center_y':0.4}
+        MDTextField:
+            hint_text: "M or F"
+            icon_right: 'help'
+            mode:"round"
+            id:gender
+            hint_text: "M OR F"
             size_hint_x: None
             size_hint_y: 0.08
             width: 247
             font_size: 18
-            pos_hint: {'center_x':0.5, 'center_y':0.2}
+            pos_hint: {'center_x':0.5, 'center_y':0.3}
         MDFillRoundFlatButton:
-            text: "Finish !"
+            text: "Sign Up !"
             font_size: "20sp"
-            font_name: "OpenSans"
-            pos_hint: {'center_x':0.5, 'center_y':0.1}
+            font_name: "Popp"
+            pos_hint: {'center_x':0.5, 'center_y':0.2}
             halign: 'center'
             theme_text_color:'Custom'
             text_color: 255/255, 255/255, 255/255, 1
             size_hint: (0.58, 0.06)
-            md_bg_color: 62/255, 216/255, 133/255, 1
+            md_bg_color: 128/255, 128/255, 128/255, 1
             background_normal:''
-            on_press: app.check_register(full_name.text), app.check_register_e_mail(e_mail.text), app.check_register_address(address.text), app.check_register_password(password.text)
-        Button:
+            on_press: app.verify_datas()
+        MDIconButton:
+            icon:'arrow-left'
+            icon_color: "white"
             pos_hint: {'center_x':0.05, 'center_y':0.95}
-            size_hint: (0.2, 0.02)
-            font_size: 15
-            background_color: 41/255, 34/255, 34/255, 1
-            background_normal: ''
-            on_press: app.root.current = "accueil"
-            Image:
-                source: "back2.png"
-                center_x: self.parent.center_x
-                center_y: self.parent.center_y
-
+            theme_icon_color: 'Custom'
+            on_release: app.root.current="accueil"
 
             
 
