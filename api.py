@@ -92,7 +92,7 @@ async def create_upload_file(file: UploadFile = File(...)):
 
 
 @api.get('/products/{id_}')
-async def get_produtcts(id_: int):
+async def get_produtcts(id_: str):
     image = str(id_) + '.png'
     return _responses.FileResponse(image)
 
@@ -101,7 +101,14 @@ async def list_products():
     path = "C:/Users/33769/Desktop/Reviewin"
     valid_extension = '.png'
     files = os.listdir(path)
-    return files
+    print(files)
+    list_of_products = []
+    valid_extension = '.png'
+    for i in range(len(files)):
+        if files[i].endswith(valid_extension):
+            list_of_products.append(files[i])
+    print(list_of_products)
+    return list_of_products
 
 
 @api.post('/reviewin_users')
