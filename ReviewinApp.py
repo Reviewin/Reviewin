@@ -761,7 +761,7 @@ class ReviewinApp(MDApp):
             )
 
 
-
+#
         
 #if re.search(pattern,full_name_text):
     #something()
@@ -867,8 +867,6 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
-
-
 
 
 
