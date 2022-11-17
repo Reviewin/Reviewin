@@ -16,11 +16,8 @@ import fastapi.responses as _responses
 import random as _random
 import captcha 
 from captcha.image import ImageCaptcha
-from deta import Drive
 import os
-from PIL import Image
-from deta import Deta 
-from deta import Drive
+from PIL import Imagee
 import aiofiles
 import os
 
