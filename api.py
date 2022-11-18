@@ -69,6 +69,8 @@ class user__(BaseModel):
 class Recaptcha_2(BaseModel):
     captcha_value: str
 
+class condition_products(BaseModel):
+    token: str
 
 @api.post("/products")
 async def create_upload_file(file: UploadFile = File(...)):
@@ -92,23 +94,41 @@ async def create_upload_file(file: UploadFile = File(...)):
 
 
 @api.get('/products/{id_}')
-async def get_produtcts(id_: str):
+async def get_produtcts(id_: str ):
     image = str(id_) + '.png'
     return _responses.FileResponse(image)
 
-@api.get('/products')
-async def list_products():
+@api.post('/products/list')
+async def list_products(products: condition_products):
+    products = products.dict()
     path = "C:/Users/33769/Desktop/Reviewin"
     valid_extension = '.png'
     files = os.listdir(path)
-    print(files)
     list_of_products = []
     valid_extension = '.png'
-    for i in range(len(files)):
-        if files[i].endswith(valid_extension):
-            list_of_products.append(files[i])
-    print(list_of_products)
-    return list_of_products
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + products['token'] + '"' 
+    res = requests.get(url)
+    doc = res.json()
+    print(res.text)
+    print(products['token'])
+    if doc['rows'][0]['key'] == products['token']:
+        print("Successfull")
+        for i in range(len(files)):
+            if files[i].endswith(valid_extension):
+                list_of_products.append(files[i])
+        print(list_of_products)
+        return list_of_products
+    elif len(doc['rows']) == 0:
+        return {"False"}
+    else:
+        return {"Status":"Not Done"}
+
+
+#for i in range(len(files)):
+    #if files[i].endswith(valid_extension):
+        #list_of_products.append(files[i])
+#print(list_of_products)
+#return list_of_products
 
 
 @api.post('/reviewin_users')
