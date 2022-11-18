@@ -16,8 +16,11 @@ import fastapi.responses as _responses
 import random as _random
 import captcha 
 from captcha.image import ImageCaptcha
+from deta import Drive
 import os
-from PIL import Imagee
+from PIL import Image
+from deta import Deta 
+from deta import Drive
 import aiofiles
 import os
 
@@ -159,6 +162,8 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     ma_variable = requests.get(url)
     if captcha_value in ma_variable.text:
         print("Captcha good")
+        captcha_file = str(captcha['captcha_value']) + '.png'
+        os.remove(captcha_file)
         return {"Captcha":"good"}
     else:
         return {"Not good captcha":"don't let sign up"}
