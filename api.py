@@ -158,12 +158,18 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     captcha = captcha.dict()
     captcha_value = captcha['captcha_value']
     url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/captcha_test/')
     print(url)
     ma_variable = requests.get(url)
+    document = ma_variable.json()
+    print(document)
     if captcha_value in ma_variable.text:
         print("Captcha good")
         captcha_file = str(captcha['captcha_value']) + '.png'
         os.remove(captcha_file)
+        id_ = document['rows'][0]['id']
+        print(id_)
+        database.delete(database[str(id_)])
         return {"Captcha":"good"}
     else:
         return {"Not good captcha":"don't let sign up"}
