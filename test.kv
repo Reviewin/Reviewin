@@ -2,11 +2,27 @@ MDScreen:
     name: 'test'
     md_bg_color: 41/255, 34/255, 34/255, 1
     image1: ""
-    RV:
-        id: recycle
-        viewclass:'AsyncImage'
+    RecycleView:
+        viewclass: "OwnWidget"
         data: app.data
-        default_size: dp(57), dp(56)
-        default_size_hint: 1, None
-        size_hint_y: 1
-        orientation: 'vertical'
+        RecycleBoxLayout:
+            default_size: None, dp(300)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+            spacing: dp(10)
+<OwnWidget@BoxLayout>:
+    orientation: 'vertical'
+    text: ''
+    source:'' 
+    Button:
+        text: 'Below there is an image'
+        size_hint_y: None
+        height: dp(40)
+        on_press: print(product.source.replace('http://127.0.0.1:2223/products/', ''))
+    AsyncImage:
+        id: product
+        source: root.source
+
+    
