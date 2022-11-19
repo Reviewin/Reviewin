@@ -172,18 +172,16 @@ async def sign_up(info__: User_register):
 async def logout(logout_: logoutf):
     logout_ = logout_.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + logout_['token'] + '"'
-    response = requests.get(url)
+    url_ = "http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=%22" + logout_['token'] + '%22'
+    response = requests.get(url_)
     doc = response.json()
     print(doc)
     id_ = doc['rows'][0]['id']
     print(id_)
     couch = couchdb.Server('http://admin:kolea21342@127.0.0.1:5984/')
-    db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
+    db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions/')
     db.delete(db[str(id_)])
-    if db.delete(db[str(id_)]):
-        return {"Status":"Done"}
-    else:
-        return {"Status":"Not done"}
+    return {"Status":"Done"}
 
 
 @api.post('/verify_captcha')
