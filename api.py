@@ -98,6 +98,19 @@ async def get_produtcts(id_: str ):
     image = str(id_) + '.png'
     return _responses.FileResponse(image)
 
+@api.get('/products')
+async def list_products():
+    path = "C:/Users/33769/Desktop/Reviewin"
+    valid_extension = '.png'
+    files = os.listdir(path)
+    list_of_products = []
+    valid_extension = '.png'
+    for i in range(len(files)):
+        if files[i].endswith(valid_extension):
+            list_of_products.append(files[i])
+    print(list_of_products)
+    return list_of_products
+
 @api.post('/products/list')
 async def list_products(products: condition_products):
     products = products.dict()
