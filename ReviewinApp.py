@@ -79,6 +79,7 @@ class RVE(RecycleBoxLayout):
         } for x in range(10) ]
 
 
+
 class RV(RecycleView):
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
@@ -96,6 +97,7 @@ class ReviewinApp(MDApp):
     asyncimage = None
     doc = None
     data = ListProperty()
+    id_ = ListProperty()
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
@@ -119,7 +121,8 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file('myinfo.kv'))
         sm.add_widget(Builder.load_file('test.kv'))
         return sm
-    
+    def brazil(self):
+        print(self.root.get_screen('test').ids.product.source)
 
     def return_async(self):
         if not self.asyncimage:
@@ -128,10 +131,7 @@ class ReviewinApp(MDApp):
                 size_hint_y= None
             )
         self.asyncimage.open()
-
-
-
-
+    
     def test_token(self):
         print(self.token)
 
@@ -761,7 +761,7 @@ class ReviewinApp(MDApp):
             )
 
 
-#
+
         
 #if re.search(pattern,full_name_text):
     #something()
@@ -867,6 +867,8 @@ class Recaptcha(Screen):
 
 if __name__=="__main__":
     ReviewinApp().run()
+
+
 
 
 
