@@ -1,6 +1,7 @@
 MDScreen:
     name: 'test'
     md_bg_color: 41/255, 34/255, 34/255, 1
+    on_enter: app.load_products()
     image1: ""
     RecycleView:
         viewclass: "OwnWidget"
@@ -11,14 +12,17 @@ MDScreen:
             size_hint_y: None
             height: self.minimum_height
             orientation: 'vertical'
-            spacing: dp(10)
+            spacing: dp(20)
 <OwnWidget@BoxLayout>:
     orientation: 'vertical'
     text: ''
     source:'' 
-    Button:
-        text: 'Below there is an image'
-        size_hint_y: None
+    MDIconButton:
+        icon: 'arrow-left'
+        icon_color: 'white'
+        theme_icon_color: 'Custom'
+        pos_hint: {'center_x':0.3, 'center_y': 0.1  }  
+        size_hint_x: 0.3
         height: dp(40)
         on_press: print(product.source.replace('http://127.0.0.1:2223/products/', ''))
     AsyncImage:
