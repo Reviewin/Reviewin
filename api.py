@@ -181,7 +181,7 @@ async def logout(logout_: logoutf):
     couch = couchdb.Server('http://admin:kolea21342@127.0.0.1:5984/')
     db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions/')
     db.delete(db[str(id_)])
-    return {"Status":"Done"}
+    return {"Status":"Done"} 
 
 
 @api.post('/verify_captcha')
