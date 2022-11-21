@@ -98,12 +98,36 @@ class ReviewinApp(MDApp):
     doc = None
     data = ListProperty()
     id_ = ListProperty()
+    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    a = _random.choice(ac)
+    b = _random.choice(ac)
+    c = _random.choice(ac)
+    d = _random.choice(ac)
+    f = _random.choice(ac)
+    g = _random.choice(ac)
+    h = _random.choice(ac)
+    i = _random.choice(ac)
+    j = _random.choice(ac)
+    k = _random.choice(ac)
+    l = _random.choice(ac)
+    m = _random.choice(ac)
+    n = _random.choice(ac)
+    o = _random.choice(ac)
+    p = _random.choice(ac)
+    q = _random.choice(ac)
+    r = _random.choice(ac)
+    s = _random.choice(ac)
+    t = _random.choice(ac)
+    u = _random.choice(ac)
+    v = _random.choice(ac)
+    w = _random.choice(ac)
+    x = _random.choice(ac)
+    y = _random.choice(ac)
+    z = _random.choice(ac)
+    token = a + b + c + d + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
-        res = requests.get('http://127.0.0.1:2223/products')
-        self.doc = res.json()
-        self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
         global sm 
         sm = ScreenManager()
         sm.add_widget(Builder.load_file("splash.kv"))
@@ -123,6 +147,14 @@ class ReviewinApp(MDApp):
         return sm
     def brazil(self):
         print(self.root.get_screen('test').ids.product.source)
+    
+    def load_products(self):
+        token = self.token
+        json = {"token":token}
+        res = requests.post('http://127.0.0.1:2223/products/list', json=json)
+        self.doc = res.json()
+        self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
+        
 
     def return_async(self):
         if not self.asyncimage:
@@ -159,40 +191,13 @@ class ReviewinApp(MDApp):
     def login__(self):
         e_mail = self.root.current_screen.ids.e_mail_1.text
         password = self.root.current_screen.ids.password_1.text
-        ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-        a = _random.choice(ac)
-        b = _random.choice(ac)
-        c = _random.choice(ac)
-        d = _random.choice(ac)
-        f = _random.choice(ac)
-        g = _random.choice(ac)
-        h = _random.choice(ac)
-        i = _random.choice(ac)
-        j = _random.choice(ac)
-        k = _random.choice(ac)
-        l = _random.choice(ac)
-        m = _random.choice(ac)
-        n = _random.choice(ac)
-        o = _random.choice(ac)
-        p = _random.choice(ac)
-        q = _random.choice(ac)
-        r = _random.choice(ac)
-        s = _random.choice(ac)
-        t = _random.choice(ac)
-        u = _random.choice(ac)
-        v = _random.choice(ac)
-        w = _random.choice(ac)
-        x = _random.choice(ac)
-        y = _random.choice(ac)
-        z = _random.choice(ac)
-        token = a + b + c + d + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
         json_datas = {"e_mail":e_mail, "password":password}
         json_to_load = {"e_mail":e_mail}
         url_load = 'http://127.0.0.1:2223/load'
         url = 'http://127.0.0.1:2223/loginn'
         url_session = 'http://127.0.0.1:2223/sessions'
         res = requests.post(url, json=json_datas)
-        json_session = {"e_mail":e_mail, "password":password, "token":token}
+        json_session = {"e_mail":e_mail, "password":password, "token":self.token}
 
         if res.json() == {"User":"exists"}:
             print("User exists")
@@ -377,6 +382,7 @@ class ReviewinApp(MDApp):
 
     def logoutnew(self):
         token = self.token
+        print(token)
         log_out_data = {"token":token}
         url = 'http://127.0.0.1:2223/logout'
         res = requests.post(url, json=log_out_data)
