@@ -189,6 +189,7 @@ class ReviewinApp(MDApp):
         y = _random.choice(ac)
         z = _random.choice(ac)
         self.token = a + b + c + d + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
+        print(self.token)
         e_mail = self.root.current_screen.ids.e_mail_1.text
         password = self.root.current_screen.ids.password_1.text
         json_datas = {"e_mail":e_mail, "password":password}
