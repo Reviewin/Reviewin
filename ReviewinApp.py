@@ -127,7 +127,12 @@ class ReviewinApp(MDApp):
         res = requests.post('http://127.0.0.1:2223/products/list', json=json)
         self.doc = res.json()
         self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
-        
+
+    def reload_datas(self):
+        json_token = {"token":self.token}
+        response = requests.post('http://127.0.0.1:2223/products/list', json=json_token)
+        self.doc = response.json()
+        self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
 
     def return_async(self):
         if not self.asyncimage:
@@ -393,10 +398,6 @@ class ReviewinApp(MDApp):
             toast('Successfully logged out.')
         else:
             toast('Failed to log out. Please verify your wifi connection or try again.')
-
-    def reload_datas(self):
-        json_token = {"token":token}
-        response = requests.post('http://127.0.0.1:2223/products/list', json=json_token)
 
     def toke(self):
         ac = ['ac', 'aaa']
