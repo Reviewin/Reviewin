@@ -134,14 +134,6 @@ async def list_products(products: condition_products):
     else:
         return {"Status":"Not Done"}
 
-
-#for i in range(len(files)):
-    #if files[i].endswith(valid_extension):
-        #list_of_products.append(files[i])
-#print(list_of_products)
-#return list_of_products
-
-
 @api.post('/reviewin_users')
 async def sign_up(info__: User_register):
     info__ = info__.dict()
