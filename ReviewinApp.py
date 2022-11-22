@@ -98,33 +98,6 @@ class ReviewinApp(MDApp):
     doc = None
     data = ListProperty()
     id_ = ListProperty()
-    ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    a = _random.choice(ac)
-    b = _random.choice(ac)
-    c = _random.choice(ac)
-    d = _random.choice(ac)
-    f = _random.choice(ac)
-    g = _random.choice(ac)
-    h = _random.choice(ac)
-    i = _random.choice(ac)
-    j = _random.choice(ac)
-    k = _random.choice(ac)
-    l = _random.choice(ac)
-    m = _random.choice(ac)
-    n = _random.choice(ac)
-    o = _random.choice(ac)
-    p = _random.choice(ac)
-    q = _random.choice(ac)
-    r = _random.choice(ac)
-    s = _random.choice(ac)
-    t = _random.choice(ac)
-    u = _random.choice(ac)
-    v = _random.choice(ac)
-    w = _random.choice(ac)
-    x = _random.choice(ac)
-    y = _random.choice(ac)
-    z = _random.choice(ac)
-    token = a + b + c + d + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
     def build(self):
         dialog = None
         self.title = "ReviewinApp"
@@ -189,6 +162,33 @@ class ReviewinApp(MDApp):
         print(res)
     
     def login__(self):
+        ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+        a = _random.choice(ac)
+        b = _random.choice(ac)
+        c = _random.choice(ac)
+        d = _random.choice(ac)
+        f = _random.choice(ac)
+        g = _random.choice(ac)
+        h = _random.choice(ac)
+        i = _random.choice(ac)
+        j = _random.choice(ac)
+        k = _random.choice(ac)
+        l = _random.choice(ac)
+        m = _random.choice(ac)
+        n = _random.choice(ac)
+        o = _random.choice(ac)
+        p = _random.choice(ac)
+        q = _random.choice(ac)
+        r = _random.choice(ac)
+        s = _random.choice(ac)
+        t = _random.choice(ac)
+        u = _random.choice(ac)
+        v = _random.choice(ac)
+        w = _random.choice(ac)
+        x = _random.choice(ac)
+        y = _random.choice(ac)
+        z = _random.choice(ac)
+        self.token = a + b + c + d + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
         e_mail = self.root.current_screen.ids.e_mail_1.text
         password = self.root.current_screen.ids.password_1.text
         json_datas = {"e_mail":e_mail, "password":password}
@@ -387,11 +387,24 @@ class ReviewinApp(MDApp):
         url = 'http://127.0.0.1:2223/logout'
         res = requests.post(url, json=log_out_data)
         print(res.text)
-        if res.text == {"Status":"Done"}:
+        if res.json() == {"Status":"Done"}:
             sm.current = "login"
             toast('Successfully logged out.')
         else:
             toast('Failed to log out. Please verify your wifi connection or try again.')
+
+    def reload_datas(self):
+        json_token = {"token":token}
+        response = requests.post('http://127.0.0.1:2223/products/list', json=json_token)
+
+    def toke(self):
+        ac = ['ac', 'aaa']
+        self.tokef = _random.choice(ac)
+        print(self.tokef)
+
+
+    def test_token(self):
+        print(self.tokef)
 
         
     def log_out(self):
