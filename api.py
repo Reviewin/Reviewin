@@ -19,8 +19,6 @@ from captcha.image import ImageCaptcha
 from deta import Drive
 import os
 from PIL import Image
-from deta import Deta 
-from deta import Drive
 import aiofiles
 import os
 
@@ -289,7 +287,8 @@ async def log_in(info_login: UserLogin):
     else:
         return {"Status":"Not done"}
 
-
+@api.post('/notations')
+async def notations()
 
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2223)
