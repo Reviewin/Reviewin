@@ -70,6 +70,12 @@ class Recaptcha_2(BaseModel):
 class condition_products(BaseModel):
     token: str
 
+
+class products_delete(BaseModel):
+    token: str
+    partner_product: str
+
+
 @api.post("/products")
 async def create_upload_file(file: UploadFile = File(...)):
     ac =  ['0','1','2','3', '4', '5', '6', '7', '8', '9']
@@ -90,6 +96,23 @@ async def create_upload_file(file: UploadFile = File(...)):
         file_object.write(file.file.read())
     return {"info": f"file '{file.filename}' saved at '{file_location}'"}
 
+
+@api.post('/delete')
+async def delete_products(partners: products_delete):
+    partners = partners.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:2223/sessions/_design/sessions/_view/loadddatas?key="' + partners['token'] + '"'
+    a = partners['token']
+    response = requests.get(url)
+    path = 'C:/Users/33769/Desktop/Reviewin'
+    path_2 = str(path + partners['partner_product_id'])
+    os.listdir(path)
+    if a in response.json():
+        if partners['partner_product'] in os.listdir(path):
+            os.remove(path_2)
+        else:
+            return {"Product_id":"Not Valid"}
+    else:
+        return {"Status":"Not done"}
 
 @api.get('/products/{id_}')
 async def get_produtcts(id_: str ):
@@ -133,6 +156,14 @@ async def list_products(products: condition_products):
         return {"False"}
     else:
         return {"Status":"Not Done"}
+
+
+#for i in range(len(files)):
+    #if files[i].endswith(valid_extension):
+        #list_of_products.append(files[i])
+#print(list_of_products)
+#return list_of_products
+
 
 @api.post('/reviewin_users')
 async def sign_up(info__: User_register):
@@ -279,8 +310,6 @@ async def log_in(info_login: UserLogin):
     else:
         return {"Status":"Not done"}
 
-@api.post('/notations')
-async def notations()
 
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2223)
