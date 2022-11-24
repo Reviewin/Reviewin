@@ -172,9 +172,10 @@ async def sign_up(info__: User_register):
     url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
     res = requests.get(url)
+    gender_list = ['M', 'F']
 
     if user_e_mail not in res.json():
-        if len(info__['password']) > 8 and info__['points'] == 0:
+        if len(info__['password']) > 8 and info__['points'] == 0 and info__['gender'] in gender_list and len(country) > 3 and int(info__['age'] >= 16):
             print("User registered")
             db.save(info__)
             return {"User":"Saved"}
