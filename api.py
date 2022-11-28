@@ -45,7 +45,7 @@ class load_(BaseModel):
 
 class User_register(BaseModel):
     gender: str
-    age: str
+    age: int
     country: str
     e_mail: str
     password: str
@@ -70,11 +70,27 @@ class Recaptcha_2(BaseModel):
 class condition_products(BaseModel):
     token: str
 
-
 class products_delete(BaseModel):
     token: str
     partner_product: str
 
+class notations(BaseModel):
+    token:str
+    e_mail: str
+    age: str
+    interactions: str
+    gender: str
+    country: str
+    product_id: str
+
+class opinions(BaseModel):
+    e_mail:str
+    age: str
+    country:str
+    product_id: int
+    gender: str
+    token: str
+    opinion: str
 
 @api.post("/products")
 async def create_upload_file(file: UploadFile = File(...)):
@@ -96,11 +112,37 @@ async def create_upload_file(file: UploadFile = File(...)):
         file_object.write(file.file.read())
     return {"info": f"file '{file.filename}' saved at '{file_location}'"}
 
+@api.post('/notations')
+async def notations(notations: notations):
+    notations = notations.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + notations['token'] + '"'
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products_notations')
+    database_for_opinions = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products_opinions')
+    url_to_verify = "http://admin:kolea21342@127.0.0.1:5984/products_notations/_design/design_notations/_view/view_notations?key=" + notations['product_id'] + '"'
+    res = requests.get(url)
+    response = requests.get(url_to_verify)
+    list_of_interactions = ['want it ','dont want it']
+    if notations['token'] in res.json() and notations['token'] not in response.json() and notations['interactions'] in list_of_interactions:
+        database.save(notations)
+    else:
+        return {"Status":"not Done"}
+
+@api.post('/opinions')
+async def save_opinions(opinions: opinions):
+    opinions = opinions.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + opinions['token'] + '"'
+    response = requests.get(url)
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1/')
+    list_of_interactions = ['Want It !', 'Dont  want it']
+    if opinions['token'] in res.json() and opinions['interactions'] in list_of_interactions:
+        database.save(opinions)
+    else:
+        {"Status":"Done"}
 
 @api.post('/delete')
 async def delete_products(partners: products_delete):
     partners = partners.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:2223/sessions/_design/sessions/_view/loadddatas?key="' + partners['token'] + '"'
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + partners['token'] + '"'
     a = partners['token']
     response = requests.get(url)
     path = 'C:/Users/33769/Desktop/Reviewin'
@@ -119,6 +161,7 @@ async def get_produtcts(id_: str ):
     image = str(id_) + '.png'
     return _responses.FileResponse(image)
 
+#ancienne_fonction
 @api.get('/products')
 async def list_products():
     path = "C:/Users/33769/Desktop/Reviewin"
@@ -158,13 +201,6 @@ async def list_products(products: condition_products):
         return {"Status":"Not Done"}
 
 
-#for i in range(len(files)):
-    #if files[i].endswith(valid_extension):
-        #list_of_products.append(files[i])
-#print(list_of_products)
-#return list_of_products
-
-
 @api.post('/reviewin_users')
 async def sign_up(info__: User_register):
     info__ = info__.dict()
@@ -175,15 +211,10 @@ async def sign_up(info__: User_register):
     gender_list = ['M', 'F']
 
     if user_e_mail not in res.json():
-        if len(info__['password']) > 8 and info__['points'] == 0 and info__['gender'] in gender_list and len(country) > 3 and int(info__['age'] >= 16):
+        if len(info__['password']) > 8 and info__['points'] == 0 and info__['gender'] in gender_list and len(info__['country']) > 3 and int(info__['age'] >= 16):
             print("User registered")
             db.save(info__)
             return {"User":"Saved"}
-            if db.save(info__):
-                print('user registered')
-                return {"User":"registered"}
-            else:
-                return {"User":"not registered"}
         else:
             return {"Password":"Not valid"}
     else:
@@ -199,7 +230,6 @@ async def logout(logout_: logoutf):
     doc = response.json()
     print(doc)
     id_ = doc['rows'][0]['id']
-    print(id_)
     couch = couchdb.Server('http://admin:kolea21342@127.0.0.1:5984/')
     db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions/')
     db.delete(db[str(id_)])
@@ -212,16 +242,12 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     captcha_value = captcha['captcha_value']
     url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
     database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/captcha_test/')
-    print(url)
     ma_variable = requests.get(url)
     document = ma_variable.json()
-    print(document)
     if captcha_value in ma_variable.text:
-        print("Captcha good")
         captcha_file = str(captcha['captcha_value']) + '.png'
         os.remove(captcha_file)
         id_ = document['rows'][0]['id']
-        print(id_)
         database.delete(database[str(id_)])
         return {"Captcha":"good"}
     else:
