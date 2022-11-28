@@ -118,8 +118,6 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file('myinfo.kv'))
         sm.add_widget(Builder.load_file('test.kv'))
         return sm
-    def brazil(self):
-        print(self.root.get_screen('test').ids.product.source)
     
     def load_products(self):
         token = self.token
@@ -127,23 +125,14 @@ class ReviewinApp(MDApp):
         res = requests.post('http://127.0.0.1:2223/products/list', json=json)
         self.doc = res.json()
         self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
-
+    def brazil_3(self):
+        print('some')
     def reload_datas(self):
         json_token = {"token":self.token}
         response = requests.post('http://127.0.0.1:2223/products/list', json=json_token)
         self.doc = response.json()
         self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
 
-    def return_async(self):
-        if not self.asyncimage:
-            self.asyncimage = AsyncImage(
-                source="http://127.0.0.1:2223/captcha",
-                size_hint_y= None
-            )
-        self.asyncimage.open()
-    
-    def test_token(self):
-        print(self.token)
 
 
     def dialog__(self):
@@ -211,45 +200,53 @@ class ReviewinApp(MDApp):
             sm.current = "user-interface"
         else:
             toast('Invalid password or e-mail.')
-    
-    def tttt(self):
-        res = requests.get('http://127.0.0.1:2223/get')
-    
-    def load_e_mail(self):
-        text = self.root.get_screen('login').ids.e_mail_1.text
 
-    def load_password(self):
-        text = self.root.get_screen('login').ids.password_1.text
+    def notations_true(self, source):
+        products_id = source.replace('http://127.0.0.1:2223/products/', '')
+        print(products_id)
+        e_mail = self.root.get_screen('myinfo').ids.user_e_mail.text
+        age = self.root.get_screen('myinfo').ids.age_1.text
+        country = self.root.get_screen('myinfo').ids.country_1.text
+        gender = self.root.get_screen('myinfo').ids.gender_1.text
+        token = self.token
+        json_to_post = {
+            "e_mail":e_mail,
+            "age": age,
+            "token": token,
+            "gender": gender,
+            "country": country,
+            "interaction":"Want it !",
+            "product_id":products_id
+        }
+        res = requests.post('http://127.0.0.1:2223/notations', json=json_to_post)
+        if res.json() == {"Status":"Not done"}:
+            toast("You have already gave your opinion about that product")
+        else:
+            return {"True"}
     
-    def load_gender_js(self):
-        self.text = "aaa"
+    def notations_false(self, source):
+        products_id = source.replace('http://127.0.0.1:2223/products/', '')
+        print(products_id)
+        e_mail = self.root.get_screen('myinfo').ids.user_e_mail.text
+        age = self.root.get_screen('myinfo').ids.age_1.text
+        country = self.root.get_screen('myinfo').ids.country_1.text
+        gender = self.root.get_screen('myinfo').ids.gender_1.text
+        token = self.token
+        json_to_post = {
+            "e_mail":e_mail,
+            "age": age,
+            "token": token,
+            "gender": gender,
+            "country": country,
+            "interaction":" don't Want it !",
+            "product_id":products_id
+        }
+        res = requests.post('http://127.0.0.1:2223/notations', json=json_to_post)
     
-
-    def test_6(self):
-        print('tttt')
-
-    def test_enter(self):
-        self.test_6()
     
     def current(self):
         sm.current = "login"
 
-    def dialog_(self):
-        if not self.notdialog:
-            self.dialog = MDDialog(
-                text="You were successfully registered ! We, The Reviewin Team, are pleased to welcome you as a Reviewin User. Enjoy !",
-                font_name="Popp",
-                font_size="17sp",
-                theme_text_color='Custom',
-                buttons=[
-                    MDFlatButton(
-                        text="Log In",
-                        text_color= [0,0,0,0],
-                        on_press= self.current()
-                    )
-                ]
-            )
-        self.dialog.open()
 
 
     def recaptcha__(self):
@@ -270,18 +267,19 @@ class ReviewinApp(MDApp):
         resp = requests.post(url_register, json=user_data)
         e_mail_1 = {"e_mail":e_mail}
 
-        if res.json() == {"Captcha":"good"} and resp.json() == {"User":"registered"}:
+        if res.json() == {'Captcha':'good'} and resp.json() == {"User":"Saved"}:
+            print(res.json())
+            print(resp.json())
             toast('Registered successfully', duration= 2.5)
             sm.current = "login"
             print('User registered')
-        elif res.json() != {"Captcha":"good"} and resp.text == {"User":"registered"}:
+        elif res.json() != {'Captcha':'good'} and resp.text == {"User":"Saved"}:
+            print(res.json())
             toast("Invalid captcha value.")
         else:
+            print(res.json())
             toast("E-mail already used.", duration=3)
 
-
-    def build_build(self):
-        return Builder.load_string(KV)
 
     def on_start(self):
         Clock.schedule_once(self.accueil, 3)
@@ -292,30 +290,6 @@ class ReviewinApp(MDApp):
     def color_characters_compteur(self):
         self.theme_cls.primary_palette = "Cyan"
 
-
-    def test_input(self):
-        if not self.dialog:
-            self.dialog = MDInputDialog(
-                title= "Recaptcha",
-            )
-        self.dialog.open()
-
-
-    def test_2(self):
-        if not self.dialog:
-            self.dialog = MDDialog(
-                title= "Recaptcha",
-                text="Just copy the text you're seeing",
-                images=[
-                    Image(
-                        source= 'captcha.png',
-                        center_x = self.parent.center_x,
-                        center_y = self.parent.center_y,
-                        size_hint= (0.4, 0.3) 
-                        ),
-                    ],
-                )
-        self.dialog.open()
 
 
     def account(self):
@@ -361,29 +335,10 @@ class ReviewinApp(MDApp):
             )
         self.dialog.open()
 
-    def test_ayoub(self):
-        if self.root.current_screen.ids.full_name.text == 'ayoub':
-            test_2()
-        else:
-            print("nnnnn")
-    
-    def do_something(self):
-        full_name = self.root.current_screen.ids.full_name.text
-        print(full_name)
-    
-    def test_rec(self):
-        if not self.dialog:
-            self.dialog = MDDialog(
-                title= "Recaptcha",
-                text="Just copy the text you're seeing",
-                type="custom",
-                height= "400dp",
-                content_cls=Content()
-            )
-        self.dialog.open()
-    
-    def press(self):
-        print('pressed')
+
+
+    def notations(self, source):
+        product_id = self.product
 
 
     def logoutnew(self):
@@ -408,37 +363,6 @@ class ReviewinApp(MDApp):
     def test_token(self):
         print(self.tokef)
 
-        
-    def log_out(self):
-        if not self.new_dialog:
-            self.new_dialog = MDDialog(
-                title= "Log out",
-                text= "Are you sure to log out ?",
-                font_size= "18",
-                font_name= "Robold",
-                type= "custom",
-                buttons = [
-                    MDFlatButton(
-                        text= "[u]Yes[/u]",
-                        text_color= [1,1,1,1],
-                        font_size= "17sp",
-                        font_name= "Popp",
-                        theme_text_color= "Custom",
-                        on_release= self.logoutnew(),
-                    ),
-                    MDFlatButton(
-                        text= "[u]No.[/u]",
-                        text_color= [1,1,1,1],
-                        font_size= "17sp",
-                        font_name="Popp",
-                        theme_text_color= "Custom",
-                        on_relase= self.newdialog.dismiss(),
-                    )
-                ]
-            )
-
-
-
     
 
     def recaptcha_de_wish(self):
@@ -462,23 +386,7 @@ class ReviewinApp(MDApp):
                     ),
                 )
         self.dialog.open()
-    def verify(self):
-        full_name = self.root.get_screen('register').ids.full_name.text
-        print(full_name)
 
-    def test_dialog(self):
-        if not self.dialoge:
-            self.dialoge = MDDialog(
-                title= "Recaptcha",
-                text="Just copy the text you're seeing",
-                type="custom",
-                height= "400dp",
-                content_cls= AsyncImage(
-                    source= 'http://127.0.0.1:8080/captchaa',
-                    size_hint_y= None,
-                )
-            )
-        self.dialoge.open()
     
     def user2_go(self):
         sm.current = "user2"
@@ -511,14 +419,7 @@ class ReviewinApp(MDApp):
             ],
             
         ),
-    def on_enter_show_recaptcha(self):
-        if not self.asyncimage:
-            self.asyncimage = AsyncImage(
-                source= 'http://127.0.0.1:2223/captcha',
-                size_hint_y= None
-            )
-        self.asyncimage.texture_update()
-    
+
     def go_to_screen_rec(self,*args):
         sm.current == "recaptcha"
 
@@ -563,48 +464,6 @@ class ReviewinApp(MDApp):
 
 
 
-
-#fonction recaptcha de secours
-    def recaptcha_test(self, image):
-        image= [
-            Image(
-                source= 'test_recaptcha.png',
-                center_x= self.parent.center_x,
-                center_y= self.parent.center_y,   
-            ),
-            Image(
-                source= 'test_recaptcha.png',
-                center_x= self.parent.center_x,
-                center_y= self.parent.center_y,   
-            ),
-            Image(
-                source= 'test_recaptcha.png',
-                center_x= self.parent.center_x,
-                center_y= self.parent.center_y,   
-            ),
-            Image(
-                source= 'test_recaptcha.png',
-                center_x= self.parent.center_x,
-                center_y= self.parent.center_y,   
-            ),
-            Image(
-                source= 'test_recaptcha.png',
-                center_x= self.parent.center_x,
-                center_y= self.parent.center_y,   
-            ),
-            Image(
-                source= 'test_recaptcha.png',
-                center_x= self.parent.center_x,
-                center_y= self.parent.center_y,   
-            ),
-            Image(
-                source= 'test_recaptcha.png',
-                center_x= self.parent.center_x,
-                center_y= self.parent.center_y,   
-            ),
-        random.choice(image)
-
-        ]
     def password_not_valid(self, password):
         password = self.root.current_screen.ids.password.text
         if len(password) < 8:
@@ -617,42 +476,6 @@ class ReviewinApp(MDApp):
                     font_name= 'Popp',
                 )
             ]
-
-
-
-    def check_auth_user(self):
-        full_name_text = self.root.current_screen.ids.full_name.text
-        age = int(self.root.current_screen.ids.age.text)
-        e_mail = self.root.current_screen.ids.e_mail.text
-        gender = str(self.root.current_screen.ids.gender.text)
-        country = self.root.current_screen.ids.country.text 
-        pattern_verify = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
-
-        if len(self.root.current_screen.ids.full_name.text) < 4:
-            toast("Please enter a valid name.")
-        else:
-            return True
-        if int(self.root.current_screen.ids.age.text)<16:
-            toast("You need to be aged of at least sixteen-years-old to use this application.See more at RGPD website.")
-        else:
-            return True
-        if self.root.current_screen.ids.gender.text != "M" or "F":
-            toast("You need to mention your gender.")
-        else:
-            return True
-        if re.search(pattern, e_mail):
-            return True        
-        else:
-            toast("Please enter a valid e-mail. If needed, you can check an example of a valid password.")
-        if len(country) < 4:
-            toast("Country invalid.")
-        else:
-            return True
-        if len(self.root.current_screen.ids.full_name.text) > 3 and self.root.current_screen.ids.age.text > 16 and self.root.current_screen.ids.gender.text == 'M' or 'F' and re.search(pattern, e_mail) and len(country) > 4:
-            recaptcha_de_wish()
-        else:
-            toast("Please sign up correctly. We advice you to see the register model.")
-
 
 
     def go_back_1(self):
@@ -723,12 +546,6 @@ class ReviewinApp(MDApp):
         data = {'full_name':json.dumps(full_name), 'age':json.dumps(age), 'country':json.dumps(country), 'e_mail':json.dumps(e_mail), 'gender':json.dumps(gender), 'password':json.dumps(password)}
         response = requests.post(url, json=data)
 
-    def login(self):
-        full_name_1 = str(self.root.current_screen.ids.full_name_1.text)
-        e_mail_1 = str(self.root.current_screen.ids.e_mail_1.text)
-        password_1 = str(self.root.current_screen.ids.password_1.text)
-        url = 'http://127.0.0.1:8080/'
-        res = requests.post()
     
     def load_personal_informations(self):
         token = self.token
@@ -752,35 +569,6 @@ class ReviewinApp(MDApp):
 
         
 #fonction de secours dont on aura surement pas besoin p
-    def create_user(self):
-        full_name = str(self.root.current_screen.ids.full_name.text)
-        gender = str(self.root.current_screen.ids.gender.text)
-        age = int(self.root.current_screen.ids.age.text)
-        country = self.root.current_screen.ids.country.text
-        e_mail = self.root.current_screen.ids.e_mail.text
-        try:
-            connection = httplib.HTTPSConnection('http://localhost:8000/')
-            connection.connect()
-            connection.request('POST', 'http://127.0.0.1/register/',json.dumps({"full_name":full_name,"e_mail":e_mail,"age":age,"gender":gender,"country":country})), {
-                "Content-type": "application/json"
-            }
-        except:
-            MDDialog(
-                title= "Error while trying to sign up. Please try gain",
-                theme_text_color= 'Custom',
-                font_name= "RSlab",
-                font_size= "15",
-                text_color= [1,1,1,1],
-                buttons= [
-                    MDFlatButton(
-                        text="[u]Try again.[/u]",
-                        theme_text_color="Custom",
-                        text_color=[1,1,1,1],
-                    ),
-
-                ]
-            )
-
 
 
         
