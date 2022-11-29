@@ -1,0 +1,49 @@
+MDScreen:
+    name: "login"
+    MDFloatLayout:
+        md_bg_color: 41/255, 34/255, 34/255, 1
+        MDIconButton:
+            icon:'arrow-left'
+            icon_color: "white"
+            pos_hint: {'center_x':0.05, 'center_y':0.95}
+            theme_icon_color: 'Custom'
+            on_release: app.root.current="register"
+        MDLabel:
+            text: "Log In"
+            font_name: "Popp"
+            font_size: "25sp"
+            pos_hint: {'center_x':0.5, 'center_y':0.75}
+            text_color: 1,1,1,1
+            halign: 'center'
+            theme_text_color: 'Custom'
+        MDTextField: 
+            id:password_1
+            mode:"round"
+            hint_text: "Password"
+            size_hint_x: None
+            size_hint_y: 0.08
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.55}
+        MDTextField:
+            id:e_mail_1
+            hint_text: "E-Mail"
+            size_hint_x: None
+            mode:"round"
+            size_hint_y: 0.08
+            width: 247
+            font_size: 18
+            pos_hint: {'center_x':0.5, 'center_y':0.65}
+        MDFillRoundFlatButton:
+            text:  "Log in !"
+            pos_hint:{'center_x':0.5, 'center_y':0.45}
+            size_hint: (0.58, 0.06)
+            font_name: "Popp"
+            font_size: "25sp"
+            theme_text_color:'Custom'
+            color: 0/255, 0/255, 0/255, 1
+            md_bg_color: 128/255, 128/255, 128/255, 1
+            background_normal: ''
+            on_release: app.login__()
+
+            

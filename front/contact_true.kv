@@ -1,0 +1,92 @@
+MDScreen:
+    name: "contact_true"
+    MDFloatLayout:
+        md_bg_color: 41/255, 34/255, 34/255, 1
+        MDLabel:
+            text: "[u]Contact Us.[/u]"
+            markup: True
+            pos_hint: {'center_x': 0.5, 'center_y':0.95}
+            text_color: 1,1,1,1
+            font_name: "Popp"
+            font_size: "20sp"
+            halign: 'center'
+            theme_text_color: 'Custom'
+        MDLabel:
+            text: "For any assistance, send us an e-mail with your personal informations to identify yourself to respond better to your issue."
+            pos_hint: {'center_x':0.55, 'center_y':0.85}
+            font_name: "Inter"
+            font_size: "19sp"
+            theme_text_color: "Custom"
+            text_color: 255/255, 255/255, 255/255, 1
+            halign: 'left'
+        MDLabel:
+            text: "E-mail:"
+            pos_hint: {'center_x':0.55, 'center_y':0.75}
+            font_name: "Inter"
+            font_size: "19sp"
+            theme_text_color: "Custom"
+            text_color: 255/255, 255/255, 255/255, 1
+            halign: 'left'
+        MDLabel:
+            text: " [u] assistance@reviewin.fr [/u]"
+            markup: True
+            pos_hint: {'center_x':0.55, 'center_y':0.75}
+            font_name: "Inter"
+            font_size: "19sp"
+            theme_text_color: "Custom"
+            text_color: 255/255, 255/255, 255/255, 1
+            halign: 'center'
+        MDIconButton:
+            icon:'arrow-left'
+            icon_color: "white"
+            pos_hint: {'center_x':0.05, 'center_y':0.95}
+            theme_icon_color: 'Custom'
+            on_release: app.root.current = "accueil"
+        MDLabel:
+            text: "commercial: [u]business@reviewin.fr[/u]"
+            markup: True
+            pos_hint: {'center_x':0.56, 'center_y':0.70}
+            font_name: "Inter"
+            font_size: "19sp"
+            theme_text_color: "Custom"
+            text_color: 255/255, 255/255, 255/255, 1
+            halign: 'left'
+        MDLabel:
+            text: "To contact the CEO: [u]ceo@reviewin.fr[/u]"
+            markup: True
+            pos_hint: {'center_x':0.55, 'center_y':0.65}
+            font_name: "Inter"
+            font_size: "19sp"
+            theme_text_color: "Custom"
+            text_color: 255/255, 255/255, 255/255, 1
+            halign: 'left'
+        MDLabel:
+            text: "For any problem related to the use of the application, please consider our page,"
+            markup: True
+            pos_hint: {'center_x':0.55, 'center_y':0.55}
+            font_name: "Inter"
+            font_size: "19sp"
+            theme_text_color:'Custom'
+            text_color: [1,1,1,1]
+            halign:'left'
+        Button:
+            text: "[u]How to use the application[/u]"
+            markup: True
+            font_size: "20sp"
+            font_name: "Popp"
+            pos_hint: {'center_x': 0.571, 'center_y': 0.519}
+            halign: 'left'
+            theme_text_color: 'Custom'
+            text_color: 1,1,1,1
+            size_hint: (0.4, 0.02)
+            background_color: 41/255, 34/255, 34/255, 1
+            background_normal: ''
+            on_press: app.root.current = "HWA"
+
+
+
+
+
+
+
+        
