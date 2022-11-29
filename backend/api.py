@@ -92,8 +92,13 @@ class opinions(BaseModel):
     token: str
     opinion: str
 
+class products(BaseModel):
+    type_of_products: str
+    company: str
+    
 @api.post("/products")
-async def create_upload_file(file: UploadFile = File(...)):
+async def create_upload_file(products: products,file: UploadFile = File(...)):
+    products = products.dict()
     ac =  ['0','1','2','3', '4', '5', '6', '7', '8', '9']
     a = _random.choice(ac)
     b = _random.choice(ac)
@@ -107,6 +112,13 @@ async def create_upload_file(file: UploadFile = File(...)):
     j = _random.choice(ac)
     random_id = a  + b + c + d + e + f + g + h + i + j + '.png'
     file.filename = random_id
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products')
+    product_info = {
+        "type_of_products": products['type_of_products'],
+        "company": products['company'],
+        "product_id": str(random_id),
+    }
+    database.save(product_info)
     file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
     with open(file_location, "wb+") as file_object:
         file_object.write(file.file.read())
