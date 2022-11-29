@@ -295,7 +295,7 @@ async def return_image():
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
     db.save(json_object)
     random_source = random_string + '.png'
-    image = ImageCaptcha(width=100, height=90)
+    image = ImageCaptcha(width=400, height=150)
     gen = image.generate_image(random_string)
     gen_1 = gen.save(random_source)
     return _responses.FileResponse(random_source)
