@@ -1,6 +1,7 @@
 import { Component, Fragment, h } from 'preact';
 
-import { Box, Button, Flex, Heading, Image, Link, List, ListItem, SimpleGrid, Spacer } from "@chakra-ui/react";
+import { BiPlusCircle } from "react-icons/bi";
+import { Box, Button, Flex, Heading, Icon, Image, Link, List, ListItem, SimpleGrid, Spacer } from "@chakra-ui/react";
 
 class ProductListPage extends Component {
     constructor() {
@@ -22,10 +23,12 @@ class ProductListPage extends Component {
     render() {
         let list = this.state.products.map((product) => (
             <ListItem key={product.id}>
-            	<Box>
-            		<Image w="100%" h="100%" fit="cover" src={product.images[0].url} />
-            		{product.name}
-            	</Box>
+                <Link href={`/products/id/${product.id}`}>
+                    <Box>
+                        <Image w="100%" h="100%" fit="cover" src={product.images[0].url} />
+                        {product.name}
+                    </Box>
+                </Link>
             </ListItem>
         ))
 
@@ -35,7 +38,9 @@ class ProductListPage extends Component {
                     <Heading as="h2" size="md">Manage your products</Heading>
                     <Link href="/products/new" ml="auto">
                     	{/* tabindex="-1" allows only the Link to be reached by keyboard navigation */}
-                        <Button colorScheme="gray" tabindex="-1">Submit new product</Button>
+                        <Button colorScheme="gray" tabindex="-1" leftIcon={<Icon as={BiPlusCircle} />}>
+                        Submit new product
+                        </Button>
                     </Link>
                 </Flex>
                 <SimpleGrid as={List} columns={[1, null, 2, 4]} spacing={6}>
