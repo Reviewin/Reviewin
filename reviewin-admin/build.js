@@ -32,8 +32,8 @@ let servePort = 8000;
 let proxyPort = 3000;
 
 fs.mkdirs(path.join(__dirname, "dist")).then(() => {
-	fs.copyFile(path.join(__dirname, "src", "index.html"), path.join(__dirname, "dist", "index.html"))
-	fs.copy(path.join(__dirname, "src", "assets"), path.join(__dirname, "dist", "assets"))
+	//fs.copyFile(path.join(__dirname, "src", "index.html"), path.join(__dirname, "dist", "index.html"))
+	fs.copy(path.join(__dirname, "src", "webroot"), path.join(__dirname, "dist"))
 	.then(() => {
 		fs.copy(path.join(__dirname, "dist", "assets", "favicon.ico"), path.join(__dirname, "dist", "favicon.ico"))
 	})
