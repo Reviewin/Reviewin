@@ -129,7 +129,7 @@ fs.mkdirs(path.join(__dirname, "dist")).then(() => {
 				}
 			}).listen(proxyPort, () => {
 				console.log("Serveur de développement en écoute.");
-				console.log("Application disponible à l'adresse https://localhost:" + proxyPort);
+				console.log("Application disponible à l'adresse http://localhost:" + proxyPort);
 			})
 		})
 	}
