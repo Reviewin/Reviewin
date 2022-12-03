@@ -100,6 +100,25 @@ class ReviewinClient {
         }
     })}
 
+    getProductById(id) {return new Promise((resolve, reject) => {
+        console.log("called getProductById")
+        this.getSession().then((session) => {
+            // role check would be done both client and server-side (the latter being the most important)
+            if (session.user.role == "partner") {
+                const product = this.sample_products.find(p => p.id == id)
+                if (product) {
+                    resolve(product)
+                }
+                else {
+                    reject("This product does not exist. It might have been deleted.")
+                }
+            }
+            else {
+                reject("This account cannot manage products")
+            }
+        })
+    })}
+
     getUserProducts() {return new Promise((resolve, reject) => {
         console.log("called getUserProducts")
         this.getSession().then((session) => {
