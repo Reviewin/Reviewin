@@ -2,6 +2,7 @@ import { Component, Fragment, h } from 'preact';
 
 import MainNav from "../../components/main-nav"
 import ProductListPage from "../product-list-page";
+import SingleProductPage from "../single-product-page";
 import GiftList from "../gift-list";
 import UserSettings from "../user-settings";
 
@@ -31,6 +32,7 @@ class LoggedInWrapper extends Component {
             <Flex as="main" marginTop="3em" w="100%">
                 <Router>
                     <ProductListPage path="/products/" />
+                    <SingleProductPage path="/products/id/:id" />
                     <GiftList path="/gifts/" />
                     <UserSettings path="/settings/" />
                 </Router>
