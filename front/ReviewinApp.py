@@ -117,8 +117,16 @@ class ReviewinApp(MDApp):
         response = requests.post('http://127.0.0.1:2223/products/list', json=json_token)
         self.doc = response.json()
         self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
+        for i in range(len(self.doc)):
+            self.i = self.doc[i].replace('.png', '')
 
-
+    def test_text(self):
+        self.root.current_screen.ids.test_text.text = sm.get_screen('test').ids.product.source.replace('http://127.0.0.1:2223/products', '')
+    
+    def en(self):
+        app = App.get_running_app()
+        product_id = self.i
+        print(self.i)
 
     def dialog__(self):
         if not self.dialog:
@@ -231,7 +239,9 @@ class ReviewinApp(MDApp):
     
     def current(self):
         sm.current = "login"
-
+    
+    def teste(self):
+        self.root.current_screen.ids.test_text = str(self.root.get_screen('test').ids.recycle.data)
 
 
     def recaptcha__(self):
@@ -544,13 +554,11 @@ class ReviewinApp(MDApp):
         age = doc['rows'][0]['value']['age']
         location = doc['rows'][0]['value']['country']
         gender = doc['rows'][0]['value']['gender']
-        self.root.current_screen.ids.age_1.text = age
-        self.root.current_screen.ids.gender_1.text = gender
-        self.root.current_screen.ids.country_1.text = location
-        self.root.current_screen.ids.user_e_mail.text = e_mail
-        self.root.current_screen.ids.password2.text = password
-
-                
+        self.root.current_screen.ids.age_1.text = str(age)
+        self.root.current_screen.ids.gender_1.text = str(gender)
+        self.root.current_screen.ids.country_1.text = str(location)
+        self.root.current_screen.ids.user_e_mail.text = str(e_mail)
+        self.root.current_screen.ids.password2.text = str(password)
 
         
 #fonction de secours dont on aura surement pas besoin p
