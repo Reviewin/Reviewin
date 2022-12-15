@@ -36,7 +36,7 @@ class MainNav extends Component {
                 )}
             </HStack>
             <Flex ml="auto">
-                <InstallButton installState={props.installState}></InstallButton>
+                <InstallButton></InstallButton>
                 { props.session.user ? (
                     <Menu>
                         <MenuButton as={Button} variant="ghost" rightIcon={<Icon as={BiChevronDown} />}>

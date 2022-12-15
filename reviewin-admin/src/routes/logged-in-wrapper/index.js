@@ -28,7 +28,7 @@ class LoggedInWrapper extends Component {
     render() {
         return (
         <Flex direction="vertical">
-            <MainNav session={this.state.session} installable={this.props.installable} install={this.props.install}/>
+            <MainNav session={this.state.session}/>
             <Flex as="main" marginTop="3em" w="100%">
                 <Router>
                     <ProductListPage path="/products/" />

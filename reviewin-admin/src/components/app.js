@@ -1,4 +1,5 @@
-import { Component, h } from 'preact';
+import { Component, createContext, h } from 'preact';
+import { useState } from 'preact/hooks';
 import { Router } from 'preact-router';
 
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
@@ -7,46 +8,47 @@ const theme = extendTheme({
 	
 })
 
+import AppContext from "./app-context";
 // Code-splitting is automated for `routes` directory
 import Entrance from "../routes/entrance";
 import LoggedInWrapper from "../routes/logged-in-wrapper";
 import Login from "../routes/login";
-import { useState } from 'preact/hooks';
 
 class App extends Component {
 	constructor() {
 		super();
-		this.state = {installable: false}
 	}
 
-	deferredPrompt;
+	context;
 
 	componentDidMount() {
         window.addEventListener("beforeinstallprompt", (e) => {
             console.log("beforeinstallprompt")
             e.preventDefault();
-            this.deferredPrompt = e;
-            console.log(this.deferredPrompt)
-            this.setState({installable: true})
+            this.context.deferredPrompt = e;
+            console.log(this.context.deferredPrompt)
+            this.context.installable = true
         })
     }
 
     installApp() {
-        this.deferredPrompt.prompt()
+        this.context.deferredPrompt.prompt()
     }
 
 	render() {
 		return (
-			<ChakraProvider theme={theme}>
-				<div id="app">
-					{/*<Header />*/}
-					<Router>
-						<Entrance path="/" />
-						<LoggedInWrapper path="/:r*" installable={this.installable} install={this.installApp}></LoggedInWrapper>
-						<Login path="/login/" />
-					</Router>
-				</div>
-			</ChakraProvider>
+			<AppContext.Provider value={this.context}>
+				<ChakraProvider theme={theme}>
+					<div id="app">
+						{/*<Header />*/}
+						<Router>
+							<Entrance path="/" />
+							<LoggedInWrapper path="/:r*"></LoggedInWrapper>
+							<Login path="/login/" />
+						</Router>
+					</div>
+				</ChakraProvider>
+			</AppContext.Provider>
 		)
 	}
 }
