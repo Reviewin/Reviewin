@@ -4,30 +4,15 @@ import { Component, Fragment, h } from 'preact';
 class InstallButton extends Component {
     constructor() {
         super();
-        this.state = { shown: {} }
-    }
-
-    deferredPrompt;
-
-    componentDidMount() {
-        window.addEventListener("beforeinstallprompt", (e) => {
-            e.preventDefault();
-            this.deferredPrompt = e;
-            console.log(this.deferredPrompt)
-            this.setState({shown: true})
-        })
-    }
-
-    installApp() {
-        this.deferredPrompt.prompt()
+        this.state = { shown: false }
     }
 
     render() {
         return (
             <div>
                 <ScaleFade in={this.state.shown} initialScale="0.5">
-                    {this.state.shown && (
-                        <Button colorScheme="yellow" onClick={this.installApp}>
+                    {this.props.installable && (
+                        <Button colorScheme="yellow" onClick={this.props.install}>
                             Installer
                         </Button>
                     )}
