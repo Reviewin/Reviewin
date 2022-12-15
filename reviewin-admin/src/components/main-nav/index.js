@@ -4,6 +4,8 @@ import { Button, Flex, Heading, Icon, Link, Menu, MenuButton, MenuDivider, MenuI
 import { BiChevronDown } from 'react-icons/bi';
 import { route } from 'preact-router';
 
+import InstallButton from '../install-button';
+
 
 class MainNav extends Component {
     constructor() {
@@ -34,6 +36,7 @@ class MainNav extends Component {
                 )}
             </HStack>
             <Flex ml="auto">
+                <InstallButton></InstallButton>
                 { props.session.user ? (
                     <Menu>
                         <MenuButton as={Button} variant="ghost" rightIcon={<Icon as={BiChevronDown} />}>
