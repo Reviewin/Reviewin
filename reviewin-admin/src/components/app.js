@@ -17,27 +17,23 @@ import Login from "../routes/login";
 class App extends Component {
 	constructor() {
 		super();
+		this.state = {}
 	}
-
-	context;
 
 	componentDidMount() {
         window.addEventListener("beforeinstallprompt", (e) => {
-            console.log("beforeinstallprompt")
             e.preventDefault();
-            this.context.deferredPrompt = e;
-            console.log(this.context.deferredPrompt)
-            this.context.installable = true
+            console.log("beforeinstallprompt called")
+            this.setState({
+				deferredPrompt: e,
+				installable: true
+			})
         })
-    }
-
-    installApp() {
-        this.context.deferredPrompt.prompt()
     }
 
 	render() {
 		return (
-			<AppContext.Provider value={this.context}>
+			<AppContext.Provider value={this.state}>
 				<ChakraProvider theme={theme}>
 					<div id="app">
 						{/*<Header />*/}

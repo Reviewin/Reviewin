@@ -10,18 +10,18 @@ class InstallButton extends Component {
         this.state = { shown: false }
     }
 	
-	installApp() {
-		const context = useContext(AppContext);
-		context.deferredHook.prompt();
+	installApp(appcontext) {
+		//const context = useContext(AppContext);
+		appcontext.deferredPrompt.prompt();
 	}
 	
     render() {
         return (
             <AppContext.Consumer>
             	{appcontext => (
-					<ScaleFade in={appcontext.installable}>
+					<ScaleFade in={appcontext.installable} initialScale={0.1}>
 	                    {appcontext.installable && (
-	                        <Button colorScheme="yellow" onClick={this.installApp}>
+	                        <Button colorScheme="yellow" onClick={() => this.installApp(appcontext)}>
 	                            Installer
 	                        </Button>
 	                    )}
