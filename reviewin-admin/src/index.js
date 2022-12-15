@@ -8,6 +8,7 @@ window.rvwnClient = new ReviewinClient();
 
 render(<App />, document.body)
 
+// L'enregistrement d'un service worker est nécessaire pour rendre le site installable
 // https://developer.mozilla.org/fr/docs/Web/API/Service_Worker_API/Using_Service_Workers#enregistrer_un_worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function(reg) {
