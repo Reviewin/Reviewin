@@ -1,0 +1,13 @@
+{
+    "name": "Espace partenaire Reviewin 2026 UwU",
+    "short_name": "EP Reviewin",
+    "start_url": "/",
+    "display": "standalone",
+    "icons": [
+        {
+            "src": "/assets/icons/mstile-150x150.png",
+            "type": "image/png",
+            "sizes": "270x270"
+        }
+    ]
+}
