@@ -96,12 +96,12 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file("login.kv"))
         sm.add_widget(Builder.load_file("User2.kv"))
         sm.add_widget(Builder.load_file("rules.kv"))
-        sm.add_widget(Builder.load_file("commentinput.kv"))
         sm.add_widget(Builder.load_file("UserInfo.kv"))
         sm.add_widget(Builder.load_file("recaptcha.kv"))
         sm.add_widget(Builder.load_file("contact_true.kv"))
         sm.add_widget(Builder.load_file('myinfo.kv'))
         sm.add_widget(Builder.load_file('test.kv'))
+        sm.add_widget(Builder.load_file("commentinput.kv"))
         return sm
     
     def load_products(self):
@@ -112,21 +112,35 @@ class ReviewinApp(MDApp):
         self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
     def brazil_3(self):
         print('some')
+
+
     def reload_datas(self):
         json_token = {"token":self.token}
         response = requests.post('http://127.0.0.1:2223/products/list', json=json_token)
         self.doc = response.json()
         self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
-        for i in range(len(self.doc)):
-            self.i = self.doc[i].replace('.png', '')
+        
 
-    def test_text(self):
-        self.root.current_screen.ids.test_text.text = sm.get_screen('test').ids.product.source.replace('http://127.0.0.1:2223/products', '')
+    def test_text(self, source):
+        self.reload_datas()
+        self.root.current = "UserInfo"
+        self.root.get_screen('UserInfo').ids.test_text.text = source
+        
+        
     
-    def en(self):
+    def product_informations(self):
         app = App.get_running_app()
         product_id = self.i
+        token = self.token
+        print(product_id)
+        print(self.token)
+        json = {
+            "token":token,
+            "product_id":self.i
+            }
+        response = requests.post('http://127.0.0.1:2223/products/informations', json=json)
         print(self.i)
+    
 
     def dialog__(self):
         if not self.dialog:
