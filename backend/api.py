@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, responses
+from fastapi import FastAPI, UploadFile, File, responses, Form
 import uvicorn
 from typing import Union
 from pydantic import BaseModel
@@ -21,10 +21,13 @@ import os
 from PIL import Image
 import aiofiles
 import os
+from services import services
+import uuid
+
 
 api = FastAPI() #on instancie 
 
-
+#ici nous avons majoritairement les modèles de données qui nous servirons plus tard
 class logout(BaseModel):
     e_mail: str
 
@@ -82,6 +85,8 @@ class notations(BaseModel):
     gender: str
     country: str
     product_id: str
+    comments: str
+    number_of_points: int
 
 class opinions(BaseModel):
     e_mail:str
@@ -92,65 +97,103 @@ class opinions(BaseModel):
     token: str
     opinion: str
 
-class products(BaseModel):
+
+class Product_informations(BaseModel):
+    token: str 
+    product_id: int
+    
+class Products(BaseModel):
     type_of_products: str
     company: str
-    
+class ProductsDatabases(BaseModel):
+    type_of_products: str
+    company: str
+class test(BaseModel):
+    test: str
+
+class Comments(BaseModel):
+    token: str
+    product_id: str 
+#ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
 @api.post("/products")
-async def create_upload_file(products: products,file: UploadFile = File(...)):
-    products = products.dict()
-    ac =  ['0','1','2','3', '4', '5', '6', '7', '8', '9']
-    a = _random.choice(ac)
-    b = _random.choice(ac)
-    c = _random.choice(ac)
-    d = _random.choice(ac)
-    e = _random.choice(ac)
-    f = _random.choice(ac)
-    g = _random.choice(ac)
-    h = _random.choice(ac)
-    i = _random.choice(ac)
-    j = _random.choice(ac)
-    random_id = a  + b + c + d + e + f + g + h + i + j + '.png'
-    file.filename = random_id
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products')
-    product_info = {
-        "type_of_products": products['type_of_products'],
-        "company": products['company'],
-        "product_id": str(random_id),
+async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...)):
+    random_id = str(uuid.uuid4()) + '.png'
+    file.filename = str(random_ide)
+    #données à envoyer à la db 
+    payload = {
+        "type_of_products":json.dumps(type_of_products).replace('"',''),
+        "company":json.dumps(company).replace('"',''),
+        "informations":json.dumps(informations).replace('"',''),
+        "product_id":str(random_id).replace('.png', '')
     }
-    database.save(product_info)
+    print(payload)
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_products')
+    database.save(payload)
     file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
     with open(file_location, "wb+") as file_object:
         file_object.write(file.file.read())
     return {"info": f"file '{file.filename}' saved at '{file_location}'"}
 
+# acquérir les données selon un certain produit
+@api.post('/products/informations')
+async def return_informations(product_informations: Product_informations):
+    product_informations = product_informations.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_products/_design/product_desogn/_view/product_view?key="' + str(product_informations['product_id']) + '"'
+    url_verif = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + str(product_informations['token']) + '"'
+    response = requests.get(url_verif)
+    doc = response.json()
+    if product_informations['token'] in doc:
+        res = requests.get(url)
+        return {"Informations":res.json()}
+    else:
+        return {"Status":"not done"}
+# pas encore opérationnel
 @api.post('/notations')
 async def notations(notations: notations):
     notations = notations.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + notations['token'] + '"'
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products_notations')
-    database_for_opinions = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products_opinions')
-    url_to_verify = "http://admin:kolea21342@127.0.0.1:5984/products_notations/_design/design_notations/_view/view_notations?key=" + notations['product_id'] + '"'
-    res = requests.get(url)
-    response = requests.get(url_to_verify)
-    list_of_interactions = ['want it ','dont want it']
-    if notations['token'] in res.json() and notations['token'] not in response.json() and notations['interactions'] in list_of_interactions:
-        database.save(notations)
+    url_for_notations = 'http://admin:kolea21342@127.0.0.1:5984/products_notations/_design/design_notations/_view/view_notations?key="' + notations['product_id'] + '"'
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/product_notations')
+    payload = {
+        'product_id':notations['product_id'],
+        "email":notations['e_mail'],
+        "age":notations['age'],
+        "gender":notations['gender'],
+        "country":notations['country']
+        
+    }
+    if notations['token'] in requests.get(url).json():
+        if notations['e_mail'] not in requests.get(url_for_notations).json():
+            print('update number of points')
+            return {"Status":"Done"}
+            #update le nombre de points dans la db users
+        else:
+            print('user already reviewed')
+            return {"Status":"Not done"}
     else:
-        return {"Status":"not Done"}
+        return {"User":"Not connected"}
 
-@api.post('/opinions')
-async def save_opinions(opinions: opinions):
-    opinions = opinions.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + opinions['token'] + '"'
+#pas encore opérationnel
+@api.post('/load_comments')
+async def load_comments(com: Comments):
+    Comments = Comments.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + Comments['token'] + '"'
+    url_view_products = 'http://127.0.0.1:5984/products_notations/_design/design_notations/_view/comments?key="' + Comments['product_id'] + '"'
     response = requests.get(url)
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1/')
-    list_of_interactions = ['Want It !', 'Dont  want it']
-    if opinions['token'] in res.json() and opinions['interactions'] in list_of_interactions:
-        database.save(opinions)
+    doc = response.json()
+    print(len(doc['rows'][0]['value']))
+    list_of_comments = []
+    if Comments['token'] in doc:
+        res = requests.get(url_view_products)
+        for i in range(len(doc['rows'][0]['value'])):
+            list_of_comments.append(doc['rows'][0]['value'][i])
+        print(list_comments)
+        return list_of_comments
     else:
-        {"Status":"Done"}
+        return {"User":"Not connected"}
 
+
+#supprimer un produit (pas encore de test coté db)
 @api.post('/delete')
 async def delete_products(partners: products_delete):
     partners = partners.dict()
@@ -159,6 +202,11 @@ async def delete_products(partners: products_delete):
     response = requests.get(url)
     path = 'C:/Users/33769/Desktop/Reviewin'
     path_2 = str(path + partners['partner_product_id'])
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products')
+    #création d'une vue pour récupérer l'id du document selon l'id du produit demandé.
+    # url vue: 
+    # requete vue
+    # doc = requetevue.json() 
     os.listdir(path)
     if a in response.json():
         if partners['partner_product'] in os.listdir(path):
@@ -167,10 +215,10 @@ async def delete_products(partners: products_delete):
             return {"Product_id":"Not Valid"}
     else:
         return {"Status":"Not done"}
-
-@api.get('/products/{id_}')
-async def get_produtcts(id_: str ):
-    image = str(id_) + '.png'
+#acquérir l'image d'un produit selon un id
+@api.get('/products/{id}')
+async def get_produtcts(id: str ):
+    image = str(id) + '.png'
     return _responses.FileResponse(image)
 
 #ancienne_fonction
@@ -187,6 +235,7 @@ async def list_products():
     print(list_of_products)
     return list_of_products
 
+#recevoir la liste des produits, d'abord une vérification que l'utilisateur est connecté, puis renvoyé une liste []
 @api.post('/products/list')
 async def list_products(products: condition_products):
     products = products.dict()
@@ -269,7 +318,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
 @api.post('/load')
 async def load_(load_data: load_):
     load_data = load_data.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + load_data['token'] + '"'
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ load_data['token'] + '"'
     res = requests.get(url)
     doc = res.json()
     print(doc)
@@ -316,24 +365,28 @@ async def return_image():
 @api.post('/sessions')
 async def sessions(user_session: sessions):
     user_session = user_session.dict()
-    url_db = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + user_session['e_mail'] + '"'
+    url_db = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key="'+ user_session['e_mail'] + '"'
     res = requests.get(url_db)
-    doc = res.json()
+    document_ = res.json()
+    print(document_)
+    print(res.text)
+    doc = res.text
     db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
     document = {
         "e_mail": user_session['e_mail'],
         "token": user_session['token'],
         "password": user_session['password'],
-        "country": doc['rows'][1]['value']['country'],
-        "age": doc['rows'][1]['value']['age'],
-        "gender": doc['rows'][1]['value']['gender']
+        "country": document_['rows'][0]['value']['country'],
+        "age": document_['rows'][0]['value']['age'],
+        "gender": document_['rows'][0]['value']['gender']
     }
-    db.save(document)
-    if db.save(document):
+    if user_session['e_mail'] in doc and user_session['password'] in doc:
+        db.save(document)
         return {"Session":"created"}
     else:
-        return {'Status':'not done'}
-
+        return {"Session":"not created"}
+    #db.save(document)
+    #return {"Session":"created"}
 
 
 @api.post('/loginn')
@@ -352,4 +405,3 @@ async def log_in(info_login: UserLogin):
 
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2223)
-
