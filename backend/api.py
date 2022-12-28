@@ -111,7 +111,7 @@ class ProductsDatabases(BaseModel):
 class test(BaseModel):
     test: str
 
-class Comments(BaseModel):
+class com(BaseModel):
     token: str
     product_id: str 
 #ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
@@ -175,23 +175,24 @@ async def notations(notations: notations):
 
 #pas encore opérationnel
 @api.post('/load_comments')
-async def load_comments(com: Comments):
-    Comments = Comments.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + Comments['token'] + '"'
-    url_view_products = 'http://127.0.0.1:5984/products_notations/_design/design_notations/_view/comments?key="' + Comments['product_id'] + '"'
+async def load_comments(com: com):
+    com = com.dict()
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="' + com['token'] + '"'
+    url_view_products = 'http://admin:kolea21342@127.0.0.1:5984/products_notations/_design/design_notations/_view/comments?key="' + com['product_id'] + '"'
     response = requests.get(url)
-    doc = response.json()
-    print(len(doc['rows'][0]['value']))
     list_of_comments = []
-    if Comments['token'] in doc:
+    if com['token'] in response.text:
         res = requests.get(url_view_products)
-        for i in range(len(doc['rows'][0]['value'])):
-            list_of_comments.append(doc['rows'][0]['value'][i])
-        print(list_comments)
+        print(res.json())
+        doc = res.json()
+        print(len(doc['rows']))
+        list_of_comments = []
+        for i in range(len(doc['rows'])):
+            list_of_comments.append(doc['rows'][i]['value'])
+        print(list_of_comments)
         return list_of_comments
     else:
-        return {"User":"Not connected"}
-
+        print("no")
 
 #supprimer un produit (pas encore de test coté db)
 @api.post('/delete')
@@ -356,7 +357,7 @@ async def return_image():
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
     db.save(json_object)
     random_source = random_string + '.png'
-    image = ImageCaptcha(width=400, height=150)
+    image = ImageCaptcha(width=600, height=400)
     gen = image.generate_image(random_string)
     gen_1 = gen.save(random_source)
     return _responses.FileResponse(random_source)
