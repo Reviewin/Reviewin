@@ -45,6 +45,8 @@ from kivymd.uix.fitimage import FitImage
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.app import App
+import uuid
+
 pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
 
 #fonts
@@ -75,6 +77,7 @@ class RV(RecycleView):
 
 #principale classe de l'application
 class ReviewinApp(MDApp):
+    like = 1
     new_dialog = None
     notdialog = None
     dialog =None
@@ -101,7 +104,9 @@ class ReviewinApp(MDApp):
         sm.add_widget(Builder.load_file("contact_true.kv"))
         sm.add_widget(Builder.load_file('myinfo.kv'))
         sm.add_widget(Builder.load_file('test.kv'))
+        sm.add_widget(Builder.load_file('intermédiaire.kv'))
         sm.add_widget(Builder.load_file("commentinput.kv"))
+        sm.add_widget(Builder.load_file('com.kv'))
         return sm
     
     def load_products(self):
@@ -119,14 +124,27 @@ class ReviewinApp(MDApp):
         response = requests.post('http://127.0.0.1:2223/products/list', json=json_token)
         self.doc = response.json()
         self.data = [{'source': 'http://127.0.0.1:2223/products/' + str(self.doc[i].replace('.png', ''))} for i in range(len(self.doc))]
-        
 
-    def test_text(self, source):
-        self.reload_datas()
-        self.root.current = "UserInfo"
+    def go_to_inter(self, source):
         self.root.get_screen('UserInfo').ids.test_text.text = source
-        
-        
+        self.root.current = "com"
+    def load_comments(self):
+        product_id = self.root.get_screen('UserInfo').ids.test_text.text.replace('http://127.0.0.1:2223/products/', '')
+        payload = {
+            "token": self.token,
+            "product_id":product_id,
+        }
+        response_for_comment = requests.post('http://127.0.0.1:2223/load_comments', json=payload)
+        self.response_server = response_for_comment.json()
+        print(self.response_server)
+        self.data = [{'text': str(self.response_server[i])} for i in range(len(self.response_server))] 
+    
+    def notations_like(self):
+        self.root.get_screen('intermediaire').ids.interactions.text = "Like"
+
+    def notations_dislike(self):
+        self.root.get_screen('intermediaire').ids.interactions.text = "Dislike"
+
     
     def product_informations(self):
         app = App.get_running_app()
@@ -163,33 +181,7 @@ class ReviewinApp(MDApp):
         print(res)
     
     def login__(self):
-        ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-        a = _random.choice(ac)
-        b = _random.choice(ac)
-        c = _random.choice(ac)
-        d = _random.choice(ac)
-        f = _random.choice(ac)
-        g = _random.choice(ac)
-        h = _random.choice(ac)
-        i = _random.choice(ac)
-        j = _random.choice(ac)
-        k = _random.choice(ac)
-        l = _random.choice(ac)
-        m = _random.choice(ac)
-        n = _random.choice(ac)
-        o = _random.choice(ac)
-        p = _random.choice(ac)
-        q = _random.choice(ac)
-        r = _random.choice(ac)
-        s = _random.choice(ac)
-        t = _random.choice(ac)
-        u = _random.choice(ac)
-        v = _random.choice(ac)
-        w = _random.choice(ac)
-        x = _random.choice(ac)
-        y = _random.choice(ac)
-        z = _random.choice(ac)
-        self.token = a + b + c + d + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
+        self.token = str(uuid.uuid4())
         print(self.token)
         e_mail = self.root.current_screen.ids.e_mail_1.text
         password = self.root.current_screen.ids.password_1.text
