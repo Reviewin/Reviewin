@@ -25,7 +25,7 @@ from services import services
 import uuid
 import regex as re
 import services
-from services import final_list_uppercase
+from services import final_list_of_countries_imported_uwu
 api = FastAPI() #on instancie 
 
 #ici nous avons majoritairement les modèles de données qui nous servirons plus tard
@@ -344,7 +344,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     print('Response of the url user view is', doc)
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and captcha['country'].upper() in final_list_uppercase:
+        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and captcha['country'].upper() in final_list_of_countries_imported_uwu:
             if user_e_mail not in resp.text:
                 database_reviewin_users.save(payload)
                 captcha_file = str(captcha['captcha_value']) + '.png'
