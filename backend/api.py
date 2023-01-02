@@ -23,7 +23,7 @@ import aiofiles
 import os
 from services import services
 import uuid
-
+import regex as re
 
 api = FastAPI() #on instancie 
 
@@ -57,6 +57,15 @@ class User_register(BaseModel):
 class recaptcha(BaseModel):
     captcha_value:  str
 
+class User(BaseModel):
+    gender: str
+    age: str
+    country: str
+    email: str
+    password: str
+    points: int
+    recaptcha_value: str
+
 class verification(BaseModel):
     e_mail: str
     age: str
@@ -68,6 +77,12 @@ class user__(BaseModel):
     e_mail: str
 
 class Recaptcha_2(BaseModel):
+    gender: str
+    age: str
+    country: str
+    email: str 
+    password: str
+    points: int
     captcha_value: str
 
 class condition_products(BaseModel):
@@ -114,6 +129,9 @@ class test(BaseModel):
 class com(BaseModel):
     token: str
     product_id: str 
+
+
+
 #ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
 @api.post("/products")
 async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...)):
@@ -298,23 +316,76 @@ async def logout(logout_: logoutf):
     return {"Status":"Done"} 
 
 
-@api.post('/verify_captcha')
+@api.post('/accounts')
 async def verify_captcha_test(captcha: Recaptcha_2):
     captcha = captcha.dict()
     captcha_value = captcha['captcha_value']
     url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
     database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/captcha_test/')
     ma_variable = requests.get(url)
+    user_e_mail = captcha['email']
+    url_e_mail = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
+    resp = requests.get(url_e_mail)
+    payload = {
+        "age":captcha['age'],
+        "country":captcha['country'],
+        "email":captcha['email'],
+        "gender":captcha['gender'],
+        "password":captcha['password'],
+        "points":captcha['points'],
+    }
+    database_reviewin_users = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_users')
+    pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
+    list_of_genders = ['M', 'F']
+    doc = resp.json()
     document = ma_variable.json()
+    print("Response of the captcha view is", document)
+    print('Response of the url user view is', doc)
     if captcha_value in ma_variable.text:
-        captcha_file = str(captcha['captcha_value']) + '.png'
-        os.remove(captcha_file)
-        id_ = document['rows'][0]['id']
-        database.delete(database[str(id_)])
-        return {"Captcha":"good"}
+        print('Valid Captcha')
+        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders:
+            if user_e_mail not in resp.text:
+                database_reviewin_users.save(payload)
+                captcha_file = str(captcha['captcha_value']) + '.png'
+                os.remove(captcha_file)
+                id_ = document['rows'][0]['id']
+                database.delete(database[str(id_)])
+                return {"Captcha":"good let sign up"}
+            else:
+                return {"User":"already exists"}
+        else:
+            {"Syntax or informations":"Invalid"}
     else:
+        print('Invalid captcha')
         return {"Not good captcha":"don't let sign up"}
 
+@api.post('/signup')
+async def signup(User: User):
+    User = User.dict()
+    captcha_value = User['recaptcha_value']
+    url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
+    user_e_mail = User['email']
+    url_e_mail = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
+    resp = requests.get(url)
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_users')
+    response = requests.get(url_e_mail)
+    payload = {
+        "age":User['age'],
+        "country":User['country'],
+        "email":User['email'],
+        "gender":User['gender'],
+        "password":User['password'],
+        "points":User['points'], 
+    }
+    if User['recaptcha_value'] in resp.json():
+        print('yes')
+        if user_e_mail not in response.text:
+            database.save(payload)
+            return {"User":"Saved"}
+        else:
+            return {"User":"already exists"}
+    else:
+        return {"Invalid":"captcha"}
 
 @api.post('/load')
 async def load_(load_data: load_):
