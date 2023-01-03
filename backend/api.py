@@ -355,7 +355,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
             else:
                 return {"User":"already exists"}
         else:
-            {"Syntax or informations":"Invalid"}
+            return {"Syntax or informations":"Invalid"}
     else:
         print('Invalid captcha')
         return {"Not good captcha":"don't let sign up"}
