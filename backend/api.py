@@ -325,7 +325,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/captcha_test/')
     ma_variable = requests.get(url)
     user_e_mail = captcha['email']
-    url_e_mail = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
+    url_e_mail = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key="'+ user_e_mail + '"'
     resp = requests.get(url_e_mail)
     payload = {
         "age":captcha['age'],
@@ -340,12 +340,11 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     list_of_genders = ['M', 'F']
     doc = resp.json()
     document = ma_variable.json()
-    print("Response of the captcha view is", document)
-    print('Response of the url user view is', doc)
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
         if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and captcha['country'].upper() in final_list_of_countries_imported_uwu:
             if user_e_mail not in resp.text:
+                print(resp.json())
                 database_reviewin_users.save(payload)
                 captcha_file = str(captcha['captcha_value']) + '.png'
                 os.remove(captcha_file)
