@@ -14,3 +14,5 @@ Adding products (Working with API and Recycle View !) #Still design to adjust (o
 function to reload the products (Done)
 
 function to load comments for each products (done)
+
+notations (half done)
