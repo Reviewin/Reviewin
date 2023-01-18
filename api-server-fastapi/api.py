@@ -1,31 +1,37 @@
-from fastapi import FastAPI, UploadFile, File, responses, Form
-import uvicorn
-from typing import Union
-from pydantic import BaseModel
-from typing import Optional
+import os
+import aiofiles
 import shutil
-import couchdb
-import requests
+
+import random
+import uuid
+import regex as re
+
 import json
-from fastapi import Request 
+from PIL import Image
+
+import requests
+
+import uvicorn
+
+from fastapi import FastAPI, File, Form, Request, responses, UploadFile
+import fastapi.responses as _responses
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import recaptcha_2 as _recaptcha_2
-import fastapi.responses as _responses 
-import random as _random
+
+from pydantic import BaseModel
+
+from typing import Union
+from typing import Optional
+
+import couchdb
+
+import recaptcha_2 as _recaptcha_2 
 import captcha 
 from captcha.image import ImageCaptcha
-from deta import Drive
-import os
-from PIL import Image
-import aiofiles
-import os
-from services import services
-import uuid
-import regex as re
-import services
+
 from services import final_list_of_countries_imported_uwu
+
 api = FastAPI() #on instancie 
 
 #ici nous avons majoritairement les modèles de données qui nous servirons plus tard
@@ -413,13 +419,13 @@ async def test_verification(info_user: User_register):
 @api.get('/captcha')
 async def return_image():
     ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
-    a = _random.choice(ac)
-    b = _random.choice(ac)
-    c = _random.choice(ac)
-    d = _random.choice(ac)
-    f = _random.choice(ac)
-    g = _random.choice(ac)
-    h = _random.choice(ac)
+    a = random.choice(ac)
+    b = random.choice(ac)
+    c = random.choice(ac)
+    d = random.choice(ac)
+    f = random.choice(ac)
+    g = random.choice(ac)
+    h = random.choice(ac)
     url = 'http://admin:kolea21342@localhost:5984/captcha_test'
     random_string = a + b + c + d + f + g + h
     captcha_value = json.dumps(random_string)
