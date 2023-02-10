@@ -348,7 +348,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     document = ma_variable.json()
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and captcha['country'].upper() in final_list_of_countries_imported_uwu:
+        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and captcha['country'].upper() in final_list_of_countries_imported_uwu:
             if user_e_mail not in resp.text:
                 print(resp.json())
                 database_reviewin_users.save(payload)
