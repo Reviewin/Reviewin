@@ -17,4 +17,4 @@ function to load comments for each products (done)
 
 notations (half done)
 
-Web Client ( currently working on it)
+Web App with flet (currently working on it)
