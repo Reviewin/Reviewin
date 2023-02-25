@@ -1,5 +1,6 @@
 import flet 
 from flet import *
+import uuid
 #Sign Up
 email = Ref[TextField]()
 password = Ref[TextField]()
@@ -10,9 +11,67 @@ gender = Ref[TextField]()
 #captcha
 captcha_value = Ref[TextField]()
 points = 0
-#signin
+#signinw
 signin_ref_email = Ref[TextField]()
 signin_ref_password = Ref[TextField]()
+image_ref = Ref[Image]()
+#token
+def generate_token():
+    global token
+    token = str(uuid.uuid4())
+    return token
+class UserMainView(UserControl):
+    def __init__(self):
+        super().__init__()
+        self.mycontainer = Container(alignment=alignment.top_left, width=100, bgcolor="#292222", height=100, content=Text('Reviewin', weight='bold', color=colors.WHITE, size=16)),
+    def build(self):
+        import requests
+        import json
+        data = {"token":token}
+        url = 'http://127.0.0.1:2223/products/list'
+        self.response = requests.post(url, json=data)
+        class UserProductsView(UserControl):
+            def __init__(self):
+                super().__init__()
+            images = Column(expand=1, scroll="always",wrap=False)
+            def build(self):
+                for i in range(len(self.response)):
+                    images.controls.append(
+                        Image(
+                            ref=image_ref,
+                            src='http://127.0.0.1:2223/products/{self.response[i]}',
+                            width=400,
+                            height=400,
+                            fit= ImageFit.NONE,
+                            repeat= ImageRepeat.NO_REPEAT,
+                            border_radius= border_radius.all(10)
+                        )
+                    )
+                return View(
+                    "/@me",
+                    bgcolor="#292222",
+                    controls=[
+                        Container(alignment=alignment.top_left, width=100, bgcolor="#292222", height=100, content=Text('Reviewin', weight='bold', color=colors.WHITE, size=16)),
+                        images                        
+                    ]
+                )
+        if response.text == {"False"} or {"Status":"Not done"}:
+            print("Please connect you to use our application.")
+            return View(
+                "/@me",
+                bgcolor="#292222",
+                controls=[
+                    Column(
+                        alignment=MainAxisAlignment.CENTER,
+                        expand=True,
+                        controls=[
+                            Container(bgcolor="#292222", width=400, height=150, content=Text('Not connected !', weight='bold', size=30))
+                        ]
+                    )
+                ]
+            )
+        else:
+            UserProductsView().build()
 class SignUp(UserControl):
     def __init__(self):
         super().__init__()
@@ -53,13 +112,25 @@ class SignUp(UserControl):
                 Row(alignment=MainAxisAlignment.CENTER, controls=[Text("Already Have an account ?", color=colors.WHITE, size=18, weight='bold'), TextButton('Sign in.', on_click=self.printsomething)])
             ],)
         ])
+
 class SignIn(UserControl):
     def __init__(self):
         super().__init__()
         self.email_ = TextField(ref=signin_ref_email, color=colors.WHITE, cursor_color=colors.WHITE, cursor_radius=20, hint_text="E-mail", border_color=colors.WHITE, hint_style=TextStyle(size=15, weight='bold', italic=False,color=colors.WHITE))
         self.password_ = TextField(ref=signin_ref_password,password=True,can_reveal_password=True, color=colors.WHITE, cursor_color=colors.WHITE, cursor_radius=20, hint_text="Password", border_color=colors.WHITE, hint_style=TextStyle(size=15, weight='bold', italic=False,color=colors.WHITE))
-    def test(self,e):
-        pass
+    def login(self,e):
+        e_mail = signin_ref_email.current.value
+        password = signin_ref_password.current.value
+        import requests
+        import json
+        json_ = {"e_mail":e_mail, "password":password}
+        url = 'http://127.0.0.1:2223/loginn'
+        response = requests.post(url, json=json_)
+        if response.text == {"User":"exists"}:
+            e.page.go('/@me')
+        else:
+            print('Re-try or check your network connection.')
+        
     def build(self):
         return View(
             "/signin",
@@ -72,7 +143,7 @@ class SignIn(UserControl):
                         Row(alignment=MainAxisAlignment.CENTER,controls=[Text("Sign in."), TextButton("Sign Up.", on_click=lambda e: e.page.go("/signup"))]),
                         Row(alignment=MainAxisAlignment.CENTER, controls=[self.email_]),
                         Row(alignment=MainAxisAlignment.CENTER, controls=[self.password_]),
-                        Row(alignment=MainAxisAlignment.CENTER, controls=[TextButton('Log In.', on_click=self.test)])
+                        Row(alignment=MainAxisAlignment.CENTER, controls=[TextButton('Log In.', on_click=lambda e: e.page.go('/@me'))])
                     ]
                 )
             ]
@@ -109,6 +180,7 @@ class Captcha_View(UserControl):
                 )
             ]
         )
+
 def main(page: Page):
     page.title = "Reviewin"
     page.bgcolor = "#292225"
@@ -120,6 +192,8 @@ def main(page: Page):
             page.views.append(SignUp().build())
         if page.route == "/recaptcha2":
             page.views.append(Captcha_View().build())
+        if page.route == "/@me":
+            page.views.append(UserMainView().build())
         page.update()
     def view_pop(view):
         page.views.pop()
