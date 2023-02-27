@@ -26,11 +26,9 @@ from typing import Optional
 
 import couchdb
 
-import recaptcha_2 as _recaptcha_2 
 import captcha 
 from captcha.image import ImageCaptcha
 
-from services import final_list_of_countries_imported_uwu
 
 api = FastAPI() #on instancie 
 
@@ -250,14 +248,14 @@ async def get_produtcts(id: str ):
 #ancienne_fonction
 @api.get('/products')
 async def list_products():
-    path = "C:/Users/33769/Desktop/Reviewin"
+    path = "C:/Users/33769/Desktop/Reviewin/api-server-fastapi"
     valid_extension = '.png'
     files = os.listdir(path)
     list_of_products = []
     valid_extension = '.png'
     for i in range(len(files)):
         if files[i].endswith(valid_extension):
-            list_of_products.append(files[i])
+            list_of_products.append(files[i].replace('.png', ''))
     print(list_of_products)
     return list_of_products
 
@@ -270,11 +268,12 @@ async def list_products(products: condition_products):
     files = os.listdir(path)
     list_of_products = []
     valid_extension = '.png'
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + products['token'] + '"' 
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ str(products['token']) + '"'
     res = requests.get(url)
     doc = res.json()
     print(res.text)
     print(products['token'])
+    print(doc)
     if doc['rows'][0]['key'] == products['token']:
         print("Successfull")
         for i in range(len(files)):
@@ -326,6 +325,7 @@ async def logout(logout_: logoutf):
 @api.post('/accounts')
 async def verify_captcha_test(captcha: Recaptcha_2):
     captcha = captcha.dict()
+    print(captcha)
     captcha_value = captcha['captcha_value']
     url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
     database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/captcha_test/')
@@ -348,7 +348,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     document = ma_variable.json()
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and captcha['country'].upper() in final_list_of_countries_imported_uwu:
+        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders:
             if user_e_mail not in resp.text:
                 print(resp.json())
                 database_reviewin_users.save(payload)
