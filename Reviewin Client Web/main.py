@@ -16,6 +16,7 @@ signin_ref_email = Ref[TextField]()
 signin_ref_password = Ref[TextField]()
 image_ref = Ref[Image]()
 #token
+token = str(uuid.uuid4())
 def generate_token():
     global token
     token = str(uuid.uuid4())
@@ -23,55 +24,42 @@ def generate_token():
 class UserMainView(UserControl):
     def __init__(self):
         super().__init__()
+        import requests
+        import json
         self.mycontainer = Container(alignment=alignment.top_left, width=100, bgcolor="#292222", height=100, content=Text('Reviewin', weight='bold', color=colors.WHITE, size=16)),
+        self.images = Column(expand=True, scroll="always",wrap=False, alignment=MainAxisAlignment.CENTER)
+        self.response = requests.get('http://127.0.0.1:2223/products')
+    def append_images(self):
+        for i in range(len(self.response.json())):
+            self.images.controls.append(
+                Image(
+                    ref=image_ref,
+                    src=f"http://127.0.0.1:2223/products/{self.response.json()[i]}",
+                    width=400,
+                    height=400,
+                    fit= ImageFit.NONE,
+                    repeat= ImageRepeat.NO_REPEAT,
+                    border_radius= border_radius.all(10)
+                ),
+            )
     def build(self):
         import requests
         import json
+        print(token)
         data = {"token":token}
         url = 'http://127.0.0.1:2223/products/list'
-        self.response = requests.post(url, json=data)
-        class UserProductsView(UserControl):
-            def __init__(self):
-                super().__init__()
-            images = Column(expand=1, scroll="always",wrap=False)
-            def build(self):
-                for i in range(len(self.response)):
-                    images.controls.append(
-                        Image(
-                            ref=image_ref,
-                            src='http://127.0.0.1:2223/products/{self.response[i]}',
-                            width=400,
-                            height=400,
-                            fit= ImageFit.NONE,
-                            repeat= ImageRepeat.NO_REPEAT,
-                            border_radius= border_radius.all(10)
-                        )
-                    )
-                return View(
-                    "/@me",
-                    bgcolor="#292222",
-                    controls=[
-                        Container(alignment=alignment.top_left, width=100, bgcolor="#292222", height=100, content=Text('Reviewin', weight='bold', color=colors.WHITE, size=16)),
-                        images                        
-                    ]
-                )
-        if response.text == {"False"} or {"Status":"Not done"}:
-            print("Please connect you to use our application.")
-            return View(
-                "/@me",
-                bgcolor="#292222",
-                controls=[
-                    Column(
-                        alignment=MainAxisAlignment.CENTER,
-                        expand=True,
-                        controls=[
-                            Container(bgcolor="#292222", width=400, height=150, content=Text('Not connected !', weight='bold', size=30))
-                        ]
-                    )
-                ]
-            )
-        else:
-            UserProductsView().build()
+        images = Column(expand=True, scroll="always",wrap=False, alignment=MainAxisAlignment.CENTER)
+        response = requests.get('http://127.0.0.1:2223/products')
+        list_of_images = response.json()
+        print(list_of_images)
+        self.append_images()
+        return View(
+            "/@me",
+            bgcolor="#292222",
+            controls=[
+                self.images,
+            ]
+        )
 class SignUp(UserControl):
     def __init__(self):
         super().__init__()
@@ -126,9 +114,14 @@ class SignIn(UserControl):
         json_ = {"e_mail":e_mail, "password":password}
         url = 'http://127.0.0.1:2223/loginn'
         response = requests.post(url, json=json_)
-        if response.text == {"User":"exists"}:
+        json_sessions = {"e_mail":e_mail, "password":password, "token":token}
+        if response.json() == {"User":"exists"}:
+            res = requests.post('http://127.0.0.1:2223/sessions', json=json_sessions)
+            print(res.status_code)
+            print("datas sent !")
             e.page.go('/@me')
         else:
+            print(response.json(), response.text)
             print('Re-try or check your network connection.')
         
     def build(self):
@@ -140,10 +133,10 @@ class SignIn(UserControl):
                     alignment=MainAxisAlignment.CENTER,
                     expand=True,
                     controls=[
-                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text("Sign in."), TextButton("Sign Up.", on_click=lambda e: e.page.go("/signup"))]),
+                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text("Sign in.", color=colors.WHITE), TextButton("Sign Up.", on_click=lambda e: e.page.go("/signup"))]),
                         Row(alignment=MainAxisAlignment.CENTER, controls=[self.email_]),
                         Row(alignment=MainAxisAlignment.CENTER, controls=[self.password_]),
-                        Row(alignment=MainAxisAlignment.CENTER, controls=[TextButton('Log In.', on_click=lambda e: e.page.go('/@me'))])
+                        Row(alignment=MainAxisAlignment.CENTER, controls=[TextButton('Log In.', on_click=self.login)])
                     ]
                 )
             ]
@@ -205,4 +198,4 @@ def main(page: Page):
     page.views.append(SignUp().build())
     page.update()
 
-flet.app(target=main)
+flet.app(target=main, port=4000, view=WEB_BROWSER)
