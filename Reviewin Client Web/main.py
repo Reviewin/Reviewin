@@ -32,16 +32,18 @@ class UserMainView(UserControl):
     def append_images(self):
         for i in range(len(self.response.json())):
             self.images.controls.append(
-                Image(
-                    ref=image_ref,
-                    src=f"http://127.0.0.1:2223/products/{self.response.json()[i]}",
-                    width=400,
-                    height=400,
-                    fit= ImageFit.NONE,
-                    repeat= ImageRepeat.NO_REPEAT,
-                    border_radius= border_radius.all(10)
-                ),
-            )
+                Row(
+                    alignment=MainAxisAlignment.CENTER,
+                    controls=[Image(
+                        ref=image_ref,
+                        src=f"http://127.0.0.1:2223/products/{self.response.json()[i]}",
+                        width=400,
+                        height=400,
+                        fit= ImageFit.NONE,
+                        repeat= ImageRepeat.NO_REPEAT,
+                        border_radius= border_radius.all(10)
+                    ),]
+                ))
     def build(self):
         import requests
         import json
