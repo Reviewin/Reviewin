@@ -480,6 +480,8 @@ async def log_in(info_login: UserLogin):
     else:
         return {"Status":"Not done"}
 
-
+@api.get("/test")
+def return_test():
+    return {"test":'passed'}
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2223)
