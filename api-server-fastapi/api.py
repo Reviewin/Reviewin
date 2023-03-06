@@ -29,6 +29,8 @@ import couchdb
 import captcha 
 from captcha.image import ImageCaptcha
 
+import bcrypt
+
 
 api = FastAPI() #on instancie 
 
@@ -242,7 +244,7 @@ async def delete_products(partners: products_delete):
 #acquérir l'image d'un produit selon un id
 @api.get('/products/{id}')
 async def get_produtcts(id: str ):
-    image = str(id) + '.png'
+    image = f'C:/Users/33769/Desktop/Reviewin/api-server-fastapi/' + str(id).replace('"', '') +  '.png'
     return _responses.FileResponse(image)
 
 #ancienne_fonction

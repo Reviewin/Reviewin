@@ -30,6 +30,8 @@ class UserMainView(UserControl):
         self.images = Column(expand=True, scroll="always",wrap=False, alignment=MainAxisAlignment.CENTER)
         self.response = requests.get('http://127.0.0.1:2223/products')
     def append_images(self):
+        import requests
+        import json
         for i in range(len(self.response.json())):
             self.images.controls.append(
                 Row(
@@ -39,10 +41,10 @@ class UserMainView(UserControl):
                         src=f"http://127.0.0.1:2223/products/{self.response.json()[i]}",
                         width=400,
                         height=400,
-                        fit= ImageFit.NONE,
+                        fit= ImageFit.SCALE_DOWN,
                         repeat= ImageRepeat.NO_REPEAT,
                         border_radius= border_radius.all(10)
-                    ),]
+                    ), TextButton('Yes', on_click= lambda e: print(image_ref.current.src))]
                 ))
     def build(self):
         import requests
@@ -53,7 +55,6 @@ class UserMainView(UserControl):
         images = Column(expand=True, scroll="always",wrap=False, alignment=MainAxisAlignment.CENTER)
         response = requests.get('http://127.0.0.1:2223/products')
         list_of_images = response.json()
-        print(list_of_images)
         self.append_images()
         return View(
             "/@me",
