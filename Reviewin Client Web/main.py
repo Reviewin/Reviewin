@@ -38,7 +38,12 @@ class Test(UserControl):
                     expand=True,
                     alignment=MainAxisAlignment.CENTER,
                     controls=[
-                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[Text(f"Your e-mail is")])
+                        Row(alignment=MainAxisAlignment.CENTER, controls=[Text('My Informations', color=colors.WHITE)]),
+                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your e-mail is{document['email']}", color=colors.WHITE, weight='bold')]),
+                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your password is{document['password']}", color=colors.WHITE, weight='bold')]),
+                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your location is{document['country']}", color=colors.WHITE, weight='bold')]),
+                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your age is{document['age']}", color=colors.WHITE, weight='bold')]),
+                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your gender is{document['gender']}", color=colors.WHITE, weight='bold')]),
                     ]
                 )
             ]
