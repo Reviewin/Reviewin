@@ -21,6 +21,28 @@ def generate_token():
     global token
     token = str(uuid.uuid4())
     return token
+class Test(UserControl):
+    def __init__(self):
+        super().__init__()
+    def build(self):
+        import requests
+        import json
+        response = requests.post('http://127.0.0.1:2223/load', json={"token":token})
+        document = response.json()
+        print(document)
+        return View(
+            "/@me/personal",
+            bgcolor="#292222",
+            controls=[
+                Column(
+                    expand=True,
+                    alignment=MainAxisAlignment.CENTER,
+                    controls=[
+                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[Text(f"Your e-mail is")])
+                    ]
+                )
+            ]
+        )
 class UserMainView(UserControl):
     def __init__(self):
         super().__init__()
@@ -44,7 +66,7 @@ class UserMainView(UserControl):
                         fit= ImageFit.SCALE_DOWN,
                         repeat= ImageRepeat.NO_REPEAT,
                         border_radius= border_radius.all(10)
-                    ), TextButton('Yes', on_click= lambda e: print(image_ref.current.src))]
+                    ), TextButton('Yes', on_click= lambda e: e.page.go("/@me/personal"))]
                 ))
     def build(self):
         import requests
@@ -60,6 +82,13 @@ class UserMainView(UserControl):
             "/@me",
             bgcolor="#292222",
             controls=[
+                Column(
+                    expand=True,
+                    alignment=MainAxisAlignment.CENTER,
+                    controls=[
+                        Row(expand=True,alignment=MainAxisAlignment.START, controls=[Text('Reviewin', weight='bold', size=18, color=colors.WHITE)])
+                    ]
+                ),
                 self.images,
             ]
         )
@@ -190,6 +219,8 @@ def main(page: Page):
             page.views.append(Captcha_View().build())
         if page.route == "/@me":
             page.views.append(UserMainView().build())
+        if page.route == "/@me/personal":
+            page.views.append(Test().build())
         page.update()
     def view_pop(view):
         page.views.pop()

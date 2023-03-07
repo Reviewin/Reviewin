@@ -401,9 +401,16 @@ async def load_(load_data: load_):
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ load_data['token'] + '"'
     res = requests.get(url)
     doc = res.json()
+    document_return = {
+        "email":doc['rows'][0]['value']['e_mail'],
+        "password":doc['rows'][0]['value']['e_mail'],
+        "age":doc['rows'][0]['value']['age'],
+        "country":doc['rows'][0]['value']['country'],
+        "gender":doc['rows'][0]['value']['gender']
+    }
     print(doc)
     print(doc['rows'][0]['key'])
-    return doc
+    return document_return
 
 
 @api.post('/users')
