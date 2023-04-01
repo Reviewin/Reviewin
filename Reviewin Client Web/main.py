@@ -1,6 +1,7 @@
 import flet 
 from flet import *
 import uuid
+from flet import AppBar
 #Sign Up
 email = Ref[TextField]()
 password = Ref[TextField]()
@@ -17,13 +18,31 @@ signin_ref_password = Ref[TextField]()
 image_ref = Ref[Image]()
 #token
 token = str(uuid.uuid4())
+#Modify informations ref's
+modify_email = Ref[TextField]()
+modify_password = Ref[TextField]()
+modify_age = Ref[TextField]()
+modify_country = Ref[TextField]()
+modify_gender = Ref[TextField]() #------>   #mouais on verra si on le laisse
+#NavigationRailId
+nav = Ref[NavigationRail]()
+
 def generate_token():
     global token
     token = str(uuid.uuid4())
     return token
-class Test(UserControl):
+class PersonalInformations(UserControl):
     def __init__(self):
         super().__init__()
+    def append_view_modify(self):
+        self.controls.append(
+            Row(vertical_alignment=CrossAxisAlignment.START, expand=True, alignment=MainAxisAlignment.CENTER, controls=[TextField(ref=modify_email,color=colors.WHITE,cursor_color=colors.WHITE, cursor_radius=20, hint_text="New E-mail", border_color=colors.WHITE, hint_style=TextStyle(size=15, weight='bold', italic=False,color=colors.WHITE)),
+            Row(vertical_alignment=CrossAxisAlignment.START, expand=True, alignment=MainAxisAlignment.CENTER, controls=[TextField(ref=modify_password, color=colors.WHITE, cursor_color=colors.WHITE, cursor_radius=20, hint_text="New Password",border_color=colors.WHITE, hint_style=TextStyle(size=15, weight='bold', italic=False, color=colors.WHITE))]),
+            Row(vertical_alignment=CrossAxisAlignment.START, expand=True, alignment=MainAxisAlignment.CENTER, controls=[TextField(ref=modify_country, color=colors.WHITE, cursor_color=colors.WHITE, cursor_radius=20, hint_text="New Country", border_color=colors.WHITE, hint_style=TextStyle(size=15, weight='bold', italic=False, color=colors.WHITE))]),
+            Row(vertical_alignment=CrossAxisAlignment.START, expand=True, alignment=MainAxisAlignment.CENTER, controls=[TextField(ref=modify_age, color=colors.WHITE,cursor_color=colors.WHITE, cursor_radius=20, hint_text="New age", border_color=colors.WHITE, hint_style=TextStyle(size=15, weight='bold', italic=False, color=colors.WHITE))]),
+            Row(vertical_alignment=CrossAxisAlignment.START, expand=True, alignment=MainAxisAlignment.CENTER, controls=[TextButton('Apply')]),
+            Row(vertical_alignment=CrossAxisAlignment.START, expand=True, alignment=MainAxisAlignment.CENTER, controls=[TextButton('Cancel')]),
+            ]))
     def build(self):
         import requests
         import json
@@ -38,12 +57,12 @@ class Test(UserControl):
                     expand=True,
                     alignment=MainAxisAlignment.CENTER,
                     controls=[
-                        Row(alignment=MainAxisAlignment.CENTER, controls=[Text('My Informations', color=colors.WHITE)]),
-                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your e-mail is{document['email']}", color=colors.WHITE, weight='bold')]),
-                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your password is{document['password']}", color=colors.WHITE, weight='bold')]),
-                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your location is{document['country']}", color=colors.WHITE, weight='bold')]),
-                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your age is{document['age']}", color=colors.WHITE, weight='bold')]),
-                        Row(alignment=MainAxisAlignment.CENTER,controls=[Text(f"Your gender is{document['gender']}", color=colors.WHITE, weight='bold')]),
+                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[Text(f"Your e-mail is{document['email']}")]),
+                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[Text(f"Your password is{document['password']}")]),
+                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[Text(f"Your country is{document['country']}")]),
+                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[Text(f"You are {document['age']}")]),
+                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[Text(f"Your gender mentionned while you were registering :{document['gender']}")]),
+                        Row(vertical_alignment=CrossAxisAlignment.START, expand=True, controls=[TextButton('Modify, (it will deconnect you from your session.)', on_click=self.append_view_modify())])
                     ]
                 )
             ]
@@ -87,14 +106,15 @@ class UserMainView(UserControl):
             "/@me",
             bgcolor="#292222",
             controls=[
+                Row(alignment=MainAxisAlignment.END,controls=[Container(height=100,width=100, bgcolor="#292222", alignment=alignment.top_right, content=Dropdown(height=50,width=50, options=[dropdown.Option('My account'), dropdown.Option('F.A.Q'), dropdown.Option('Privacy Policy'), dropdown.Option('Log Out.')]))]),
+                Container(width=100, bgcolor="#292222",height=100, content=Text('Reviewin', color=colors.WHITE, weight='bold', size=22), alignment=alignment.top_left),
                 Column(
                     expand=True,
                     alignment=MainAxisAlignment.CENTER,
                     controls=[
-                        Row(expand=True,alignment=MainAxisAlignment.START, controls=[Text('Reviewin', weight='bold', size=18, color=colors.WHITE)])
+                        self.images,
                     ]
                 ),
-                self.images,
             ]
         )
 class SignUp(UserControl):
@@ -119,10 +139,24 @@ class SignUp(UserControl):
 
     def already_have_account(self,e):
         e.page.go('/signin')
+    def show(self, e):
+        if nav.current.destinations == [NavigationRailDestination(icon=icons.HELP_OUTLINE_SHARP)]:
+            nav.current.destinations.pop(0)
+        else:
+            nav.current.destinations.append(NavigationRailDestination(icon=icons.HELP_OUTLINE_SHARP))
     def build(self):
         return View("/signup",
         bgcolor="#292222",
-        controls=[Column(
+        controls=[
+            AppBar(
+                    leading=IconButton(icon=icons.DENSITY_MEDIUM, icon_color=colors.WHITE, on_click=print('something')),
+                    leading_width=40,
+                    title=Text(""),
+                    center_title=False,
+                    bgcolor="#292222",
+                    actions=[
+                        PopupMenuButton(items=[PopupMenuItem(text="Send us a message."),]),]),
+            Column(
             alignment=MainAxisAlignment.CENTER,
             expand=True,
             controls=[
@@ -134,7 +168,7 @@ class SignUp(UserControl):
                 Row(alignment=MainAxisAlignment.CENTER, controls=[self.age]),
                 Row(alignment=MainAxisAlignment.CENTER, controls=[self.gender]),
                 Row(alignment=MainAxisAlignment.CENTER, controls=[TextButton("Next Step", on_click=self.verify_datas)]),
-                Row(alignment=MainAxisAlignment.CENTER, controls=[Text("Already Have an account ?", color=colors.WHITE, size=18, weight='bold'), TextButton('Sign in.', on_click=self.printsomething)])
+                Row(alignment=MainAxisAlignment.CENTER, controls=[Text("Already Have an account ?", color=colors.WHITE, size=18, weight='bold'), TextButton('Sign in.', on_click=self.printsomething)]),
             ],)
         ])
 
@@ -152,6 +186,7 @@ class SignIn(UserControl):
         url = 'http://127.0.0.1:2223/loginn'
         response = requests.post(url, json=json_)
         json_sessions = {"e_mail":e_mail, "password":password, "token":token}
+        print(response.json())
         if response.json() == {"User":"exists"}:
             res = requests.post('http://127.0.0.1:2223/sessions', json=json_sessions)
             print(res.status_code)
@@ -225,7 +260,7 @@ def main(page: Page):
         if page.route == "/@me":
             page.views.append(UserMainView().build())
         if page.route == "/@me/personal":
-            page.views.append(Test().build())
+            page.views.append(PersonalInformations().build())
         page.update()
     def view_pop(view):
         page.views.pop()
