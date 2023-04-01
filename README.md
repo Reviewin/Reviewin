@@ -20,3 +20,5 @@ notations (half done)
 Web App with flet (currently working on it)
 
 Load products with flet (done)
+
+load personal informations with flet (done)
