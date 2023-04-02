@@ -26,7 +26,7 @@ modify_country = Ref[TextField]()
 modify_gender = Ref[TextField]() #------>   #mouais on verra si on le laisse
 #NavigationRailId
 nav = Ref[NavigationRail]()
-
+view_ref = Ref[View]()
 def generate_token():
     global token
     token = str(uuid.uuid4())
@@ -117,6 +117,23 @@ class UserMainView(UserControl):
                 ),
             ]
         )
+class Faq(UserControl):
+    def __init__(self):
+        super().__init__(self)
+    def build(self):
+        return View(
+            "/faq",
+            bgcolor="#292222",
+            controls=[
+                AppBar(
+                    leading=IconButton(icon=icons.ARROW_BACK, icon_color=colors.WHITE, on_click=lambda e: e.page.go('/signup')),
+                    leading_width=40,
+                    center_title=True,
+                    title=Text("F.A.Q", color=colors.WHITE),
+                    bgcolor="#292222",
+            )]
+        )
+
 class SignUp(UserControl):
     def __init__(self):
         super().__init__()
@@ -140,22 +157,19 @@ class SignUp(UserControl):
     def already_have_account(self,e):
         e.page.go('/signin')
     def show(self, e):
-        if nav.current.destinations == [NavigationRailDestination(icon=icons.HELP_OUTLINE_SHARP)]:
-            nav.current.destinations.pop(0)
-        else:
-            nav.current.destinations.append(NavigationRailDestination(icon=icons.HELP_OUTLINE_SHARP))
+        pass
+
     def build(self):
         return View("/signup",
         bgcolor="#292222",
         controls=[
             AppBar(
-                    leading=IconButton(icon=icons.DENSITY_MEDIUM, icon_color=colors.WHITE, on_click=print('something')),
                     leading_width=40,
                     title=Text(""),
                     center_title=False,
                     bgcolor="#292222",
                     actions=[
-                        PopupMenuButton(items=[PopupMenuItem(text="Send us a message."),]),]),
+                        PopupMenuButton(items=[PopupMenuItem(text="F.A.Q", on_click=lambda e: e.page.go('/faq')),PopupMenuItem(text="Send us a message."),]),]),
             Column(
             alignment=MainAxisAlignment.CENTER,
             expand=True,
@@ -261,6 +275,8 @@ def main(page: Page):
             page.views.append(UserMainView().build())
         if page.route == "/@me/personal":
             page.views.append(PersonalInformations().build())
+        if page.route == "/faq":
+            page.views.append(Faq().build())
         page.update()
     def view_pop(view):
         page.views.pop()
