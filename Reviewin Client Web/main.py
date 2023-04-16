@@ -1,7 +1,8 @@
-import flet 
+
 from flet import *
 import uuid
 from flet import AppBar
+
 #Sign Up
 email = Ref[TextField]()
 password = Ref[TextField]()
@@ -119,19 +120,50 @@ class UserMainView(UserControl):
         )
 class Faq(UserControl):
     def __init__(self):
-        super().__init__(self)
+        super().__init__()
+
     def build(self):
+        faq_items = [
+            Card(
+                content=Container(width=600, height=400,content=Column(horizontal_alignment=CrossAxisAlignment.CENTER,expand=True, alignment=MainAxisAlignment.START, controls=[Text("Who are we ?", size=25, color=colors.WHITE, weight='bold')]), bgcolor="#292222"),
+                elevation=5,
+                margin=5,
+            ),
+            Card(
+                content=Container(width=600, height=400,content=Text("About how we manage yout private datas."), bgcolor="#292222"),
+                elevation=5,
+                margin=10,),
+            Card(
+                content=Container(width=600, height=400,content=Text("Annexes"), bgcolor="#292222"),
+                elevation=10,
+                margin=10,
+            )
+        ]
+
         return View(
             "/faq",
             bgcolor="#292222",
+            horizontal_alignment=CrossAxisAlignment.CENTER,
             controls=[
                 AppBar(
-                    leading=IconButton(icon=icons.ARROW_BACK, icon_color=colors.WHITE, on_click=lambda e: e.page.go('/signup')),
+                    leading=IconButton(
+                        icon=icons.ARROW_BACK,
+                        icon_color=colors.WHITE,
+                        on_click=lambda e: e.page.go('/signup')
+                    ),
                     leading_width=40,
                     center_title=True,
                     title=Text("F.A.Q", color=colors.WHITE),
                     bgcolor="#292222",
-            )]
+                ),
+                Column(
+                    expand=True,
+                    alignment=MainAxisAlignment.CENTER,
+                    scroll="always",
+                    wrap=False,
+                    controls=[faq_items[0], faq_items[1], faq_items[2]]
+                )
+            ]
         )
 
 class SignUp(UserControl):
