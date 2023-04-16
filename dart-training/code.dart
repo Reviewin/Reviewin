@@ -4,27 +4,20 @@ import 'dart:math';
 
 // The Guessing Game
 void main() {
-  var random = Random();
-  num number = random.nextInt(100);
-  int number_of_try = 0;
-  while (true) {
-    String choosen = stdin.readLineSync()!;
-    num nombre = int.parse(choosen); 
-    number_of_try+=1;
-    if (nombre < number) {
-      print('To down try again');
-      continue;
+  fibonacci(50);
   }
-    else if (nombre > number) {
-      print('Too high');
-      continue; 
-    }else{
-      print("You found the number at ${number_of_try}");
-      break;
-    }
+fibonacci(int number_terms) {
+  int first_fibonnaci = 1;
+  int second_fibonnaci = 1;
+  List<int> fibonnaci_list = [];
+  for (int i = 0; i<= number_terms; i++) {
+    int next_term = first_fibonnaci + second_fibonnaci;
+    first_fibonnaci = second_fibonnaci;
+    second_fibonnaci = next_term;
+    fibonnaci_list.add(next_term);
   }
-  }
-
+  print(fibonnaci_list);
+}
 
 
 
