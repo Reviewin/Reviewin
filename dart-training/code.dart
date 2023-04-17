@@ -4,33 +4,22 @@ import 'dart:math';
 
 // The Guessing Game
 void main() {
-  password_gen();
-  }
-
-password_gen(){
-  stdout.write("Bienvenue dans votre générateur de mot de passe :");
-  stdout.write('Veuillez choisir le nombres de caractères aléatoires à générer (6 min) :');
-  String charr = stdin.readLineSync()!;
-  int char = int.parse(charr);
-  if(char > 6){
-    List<String> alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-    List<String> uppercase = [];
-    List<String> digits = ['1','2','3','4','5','6','7','8','9','0'];
-    List<String> password = [];
-    for (int i = 0; i < alphabet.length; i++){
-      uppercase.add(alphabet[i].toUpperCase());
+  int random_digit = Random().nextInt(9999);
+  List<int> random_digit_found = [];
+  int cows = 0;
+  int bulls = 0;
+  do {
+    stdout.write('Choose an index and a number');
+    int digit = int.parse(stdin.readLineSync()!);
+    int index = int.parse(stdin.readLineSync()!);
+    if (random_digit.toString().contains(digit.toString()) && random_digit.toString().indexOf(digit.toString()) == index) {
+      random_digit_found.add(digit);
     }
-    for (int i = 0; i<=char; i++) {
-      password.add(uppercase[Random().nextInt(25)]);
-      password.add(digits[Random().nextInt(10)]);
-      password.add(alphabet[Random().nextInt(25)]);
-    }
-    print("Your generated password ${password.join('')}");
-    }
-  else{
-    print('Veuillez relancer le programme vous avez choisi une mauvaise valeur');
-  }
+  } while(int.parse(random_digit_found.toString()) != random_digit);
 }
+
+
+
 
 
 
