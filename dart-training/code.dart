@@ -14,8 +14,21 @@ void main() {
     int index = int.parse(stdin.readLineSync()!);
     if (random_digit.toString().contains(digit.toString()) && random_digit.toString().indexOf(digit.toString()) == index) {
       random_digit_found.add(digit);
+      cows+=1;
+    }else if (random_digit.toString().contains(digit.toString()) && random_digit.toString().indexOf(digit.toString()) != index){
+      print("False index, try again");
+      bulls+=1;
+      continue;
+    }
+    else{
+      bulls+=1;
+      print('Totally false');
+      continue;
     }
   } while(int.parse(random_digit_found.toString()) != random_digit);
+  print("${bulls}");
+  print('${cows}');
+  print(random_digit);
 }
 
 
