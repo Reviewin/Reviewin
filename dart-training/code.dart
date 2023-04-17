@@ -4,21 +4,33 @@ import 'dart:math';
 
 // The Guessing Game
 void main() {
-  fibonacci(50);
+  password_gen();
   }
-fibonacci(int number_terms) {
-  int first_fibonnaci = 1;
-  int second_fibonnaci = 1;
-  List<int> fibonnaci_list = [];
-  for (int i = 0; i<= number_terms; i++) {
-    int next_term = first_fibonnaci + second_fibonnaci;
-    first_fibonnaci = second_fibonnaci;
-    second_fibonnaci = next_term;
-    fibonnaci_list.add(next_term);
-  }
-  print(fibonnaci_list);
-}
 
+password_gen(){
+  stdout.write("Bienvenue dans votre générateur de mot de passe :");
+  stdout.write('Veuillez choisir le nombres de caractères aléatoires à générer (6 min) :');
+  String charr = stdin.readLineSync()!;
+  int char = int.parse(charr);
+  if(char > 6){
+    List<String> alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+    List<String> uppercase = [];
+    List<String> digits = ['1','2','3','4','5','6','7','8','9','0'];
+    List<String> password = [];
+    for (int i = 0; i < alphabet.length; i++){
+      uppercase.add(alphabet[i].toUpperCase());
+    }
+    for (int i = 0; i<=char; i++) {
+      password.add(uppercase[Random().nextInt(25)]);
+      password.add(digits[Random().nextInt(10)]);
+      password.add(alphabet[Random().nextInt(25)]);
+    }
+    print("Your generated password ${password.join('')}");
+    }
+  else{
+    print('Veuillez relancer le programme vous avez choisi une mauvaise valeur');
+  }
+}
 
 
 
