@@ -1,6 +1,6 @@
 # reviewin
 
-A new Flutter project.
+Our new application project in Flutter.
 
 ## Getting Started
 
