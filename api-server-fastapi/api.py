@@ -31,6 +31,7 @@ from captcha.image import ImageCaptcha
 
 import bcrypt
 
+import hashlib
 
 api = FastAPI() #on instancie 
 
@@ -142,22 +143,29 @@ class com(BaseModel):
 #ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
 @api.post("/products")
 async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...)):
-    random_id = str(uuid.uuid4()) + '.png'
-    file.filename = str(random_ide)
-    #données à envoyer à la db 
-    payload = {
-        "type_of_products":json.dumps(type_of_products).replace('"',''),
-        "company":json.dumps(company).replace('"',''),
-        "informations":json.dumps(informations).replace('"',''),
-        "product_id":str(random_id).replace('.png', '')
-    }
-    print(payload)
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_products')
-    database.save(payload)
-    file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
-    with open(file_location, "wb+") as file_object:
-        file_object.write(file.file.read())
-    return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+    import imghdr
+    valid_formats = ['bmp', 'jpeg', 'png', 'svg']
+    if imghdr.what(None, h=file.file.read()) in valid_formats:
+        print(imghdr.what(None, h=file.file.read()))
+        random_id = str(uuid.uuid4()) + '.png'
+        file.filename = str(random_id)
+        #données à envoyer à la db 
+        payload = {
+            "type_of_products":json.dumps(type_of_products).replace('"',''),
+            "company":json.dumps(company).replace('"',''),
+            "informations":json.dumps(informations).replace('"',''),
+            "product_id":str(random_id).replace('.png', '')
+        }
+        print(payload)
+        database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_products')
+        database.save(payload)
+        file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
+        valid_formats = ['bmp', 'jpeg', 'png', 'svg']
+        with open(file_location, "wb+") as file_object:
+            file_object.write(file.file.read())
+        return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+    else:
+        return {"Bad":"format"}
 
 # acquérir les données selon un certain produit
 @api.post('/products/informations')
@@ -297,7 +305,8 @@ async def sign_up(info__: User_register):
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
     res = requests.get(url)
     gender_list = ['M', 'F']
-
+    password_hash = hashlib.md5(str.encode(info__['password'])).hexdigest()
+    info__['password'] = password_hash #je stocke le hash sous forme hexadécimale pour par lasuite comparer que les hash en hexadécimales lors des notations et autres intéractions
     if user_e_mail not in res.json():
         if len(info__['password']) > 8 and info__['points'] == 0 and info__['gender'] in gender_list and len(info__['country']) > 3 and int(info__['age'] >= 16):
             print("User registered")
@@ -323,7 +332,7 @@ async def logout(logout_: logoutf):
     db.delete(db[str(id_)])
     return {"Status":"Done"} 
 
-
+#sign-up officiel les autres endpoints ne sont que des crash tests
 @api.post('/accounts')
 async def verify_captcha_test(captcha: Recaptcha_2):
     captcha = captcha.dict()
@@ -340,7 +349,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
         "country":captcha['country'],
         "email":captcha['email'],
         "gender":captcha['gender'],
-        "password":captcha['password'],
+        "password":hashlib.md5(str.encode(captcha['password'])).hexdigest(),
         "points":captcha['points'],
     }
     database_reviewin_users = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_users')
@@ -461,7 +470,7 @@ async def sessions(user_session: sessions):
     db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
     document = {
         "e_mail": user_session['e_mail'],
-        "token": user_session['token'],
+        "token": hashlib.md5(str.encode(user_session['token'])).hexdigest(),
         "password": user_session['password'],
         "country": document_['rows'][0]['value']['country'],
         "age": document_['rows'][0]['value']['age'],
@@ -484,7 +493,7 @@ async def log_in(info_login: UserLogin):
     document = res.text
     print(document)
     doc = res.json()
-    if info_login['e_mail'] in document and info_login['password'] == doc['rows'][0]['value']['password']:
+    if info_login['e_mail'] in document and hashlib.md5(str.encode(info_login['password'])).hexdigest() == doc['rows'][0]['value']['password']:
         return {"User":"exists"}
     else:
         return {"Status":"Not done"}

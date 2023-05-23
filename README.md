@@ -22,3 +22,6 @@ Web App with flet (currently working on it)
 Load products with flet (done)
 
 load personal informations with flet (done)
+
+# Pré-requis pour pouvoir utiliser ce code 
+    - Installer les modules nécessaires (flet, hashlib, pydantic, )
