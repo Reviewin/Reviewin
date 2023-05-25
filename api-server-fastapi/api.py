@@ -120,7 +120,6 @@ class opinions(BaseModel):
     token: str
     opinion: str
 
-
 class Product_informations(BaseModel):
     token: str 
     product_id: int
@@ -128,9 +127,11 @@ class Product_informations(BaseModel):
 class Products(BaseModel):
     type_of_products: str
     company: str
+
 class ProductsDatabases(BaseModel):
     type_of_products: str
     company: str
+
 class test(BaseModel):
     test: str
 
@@ -142,30 +143,41 @@ class com(BaseModel):
 
 #ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
 @api.post("/products")
-async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...)):
+async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...), token: str = Form()):
+    url = f'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="{token}"'
+    response = requests.get(url)
+    doc = response.json()
     import imghdr
     valid_formats = ['bmp', 'jpeg', 'png', 'svg']
-    if imghdr.what(None, h=file.file.read()) in valid_formats:
-        print(imghdr.what(None, h=file.file.read()))
-        random_id = str(uuid.uuid4()) + '.png'
-        file.filename = str(random_id)
-        #données à envoyer à la db 
-        payload = {
-            "type_of_products":json.dumps(type_of_products).replace('"',''),
-            "company":json.dumps(company).replace('"',''),
-            "informations":json.dumps(informations).replace('"',''),
-            "product_id":str(random_id).replace('.png', '')
-        }
-        print(payload)
-        database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_products')
-        database.save(payload)
-        file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
-        valid_formats = ['bmp', 'jpeg', 'png', 'svg']
-        with open(file_location, "wb+") as file_object:
-            file_object.write(file.file.read())
-        return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+    def not_empty(string:str) -> bool:
+        if len(string) != 0:
+            return True
+        else:
+            return False
+    if not_empty(str(company)) and not_empty(str(type_of_products)) and not_empty(str(informations)) and doc['rows'][0]['key'] == "partner" and doc['rows'][0]['value'] == token:
+        if imghdr.what(None, h=file.file.read()) in valid_formats:
+            print(imghdr.what(None, h=file.file.read()))
+            random_id = str(uuid.uuid4()) + '.png'
+            file.filename = str(random_id)
+            #données à envoyer à la db 
+            payload = {
+                "type_of_products":json.dumps(type_of_products).replace('"',''),
+                "company":json.dumps(company).replace('"',''),
+                "informations":json.dumps(informations).replace('"',''),
+                "product_id":str(random_id).replace('.png', '')
+            }
+            print(payload)
+            database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_products')
+            database.save(payload)
+            file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
+            valid_formats = ['bmp', 'jpeg', 'png', 'svg']
+            with open(file_location, "wb+") as file_object:
+                file_object.write(file.file.read())
+            return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+        else:
+            return {"Bad":"format"}
     else:
-        return {"Bad":"format"}
+        return {"Status":"not done"}
 
 # acquérir les données selon un certain produit
 @api.post('/products/informations')
