@@ -33,6 +33,8 @@ import bcrypt
 
 import hashlib
 
+import passlib
+from passlib.hash import pbkdf2_sha256 as sh
 api = FastAPI() #on instancie 
 
 #ici nous avons majoritairement les modèles de données qui nous servirons plus tard
@@ -47,6 +49,7 @@ class sessions(BaseModel):
 class UserLogin(BaseModel):
     e_mail: str
     password: str
+    token: str
 
 class logoutf(BaseModel):
     token: str
@@ -187,7 +190,7 @@ async def return_informations(product_informations: Product_informations):
     url_verif = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + str(product_informations['token']) + '"'
     response = requests.get(url_verif)
     doc = response.json()
-    if product_informations['token'] in doc:
+    if sh.hash(product_informations['token']) in doc:
         res = requests.get(url)
         return {"Informations":res.json()}
     else:
@@ -226,7 +229,7 @@ async def load_comments(com: com):
     url_view_products = 'http://admin:kolea21342@127.0.0.1:5984/products_notations/_design/design_notations/_view/comments?key="' + com['product_id'] + '"'
     response = requests.get(url)
     list_of_comments = []
-    if com['token'] in response.text:
+    if sh.hash(com['token']) in response.text:
         res = requests.get(url_view_products)
         print(res.json())
         doc = res.json()
@@ -296,7 +299,7 @@ async def list_products(products: condition_products):
     print(res.text)
     print(products['token'])
     print(doc)
-    if doc['rows'][0]['key'] == products['token']:
+    if doc['rows'][0]['key'] == sh.hash(products['token']):
         print("Successfull")
         for i in range(len(files)):
             if files[i].endswith(valid_extension):
@@ -317,7 +320,7 @@ async def sign_up(info__: User_register):
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
     res = requests.get(url)
     gender_list = ['M', 'F']
-    password_hash = hashlib.md5(str.encode(info__['password'])).hexdigest()
+    password_hash = sh.hash(info__['password'])
     info__['password'] = password_hash #je stocke le hash sous forme hexadécimale pour par lasuite comparer que les hash en hexadécimales lors des notations et autres intéractions
     if user_e_mail not in res.json():
         if len(info__['password']) > 8 and info__['points'] == 0 and info__['gender'] in gender_list and len(info__['country']) > 3 and int(info__['age'] >= 16):
@@ -361,7 +364,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
         "country":captcha['country'],
         "email":captcha['email'],
         "gender":captcha['gender'],
-        "password":hashlib.md5(str.encode(captcha['password'])).hexdigest(),
+        "password":sh.hash(str(captcha['password'])), #on hashe le mot de passe 
         "points":captcha['points'],
     }
     database_reviewin_users = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_users')
@@ -369,9 +372,16 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     list_of_genders = ['M', 'F']
     doc = resp.json()
     document = ma_variable.json()
+    def check_server_mail(domain: str) -> bool:
+        import smtplib
+        try:
+            with smtplib.SMTP(domain) as smtp:
+                return True
+        except(smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected):
+            return False
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders:
+        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and check_server_mail(str(user_e_mail.split("@")[1])):
             if user_e_mail not in resp.text:
                 print(resp.json())
                 database_reviewin_users.save(payload)
@@ -419,12 +429,11 @@ async def signup(User: User):
 @api.post('/load')
 async def load_(load_data: load_):
     load_data = load_data.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ load_data['token'] + '"'
+    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ sh.hash(load_data['token'])+ '"'
     res = requests.get(url)
     doc = res.json()
     document_return = {
         "email":doc['rows'][0]['value']['e_mail'],
-        "password":doc['rows'][0]['value']['e_mail'],
         "age":doc['rows'][0]['value']['age'],
         "country":doc['rows'][0]['value']['country'],
         "gender":doc['rows'][0]['value']['gender']
@@ -482,7 +491,7 @@ async def sessions(user_session: sessions):
     db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
     document = {
         "e_mail": user_session['e_mail'],
-        "token": hashlib.md5(str.encode(user_session['token'])).hexdigest(),
+        "token": sh.hash(user_session['token']),
         "password": user_session['password'],
         "country": document_['rows'][0]['value']['country'],
         "age": document_['rows'][0]['value']['age'],
@@ -500,12 +509,19 @@ async def sessions(user_session: sessions):
 @api.post('/loginn')
 async def log_in(info_login: UserLogin):
     info_login = info_login.dict()
-    url = 'http://admin:kolea21342@localhost:5984/reviewin_users/_design/design_users/_view/login?key=' + '"' + info_login['e_mail'] + '"'
+    email = info_login['e_mail']
+    url = f'http://admin:kolea21342@localhost:5984/reviewin_users/_design/design_users/_view/login?key="{email}"'
     res = requests.get(url)
     document = res.text
     print(document)
     doc = res.json()
-    if info_login['e_mail'] in document and hashlib.md5(str.encode(info_login['password'])).hexdigest() == doc['rows'][0]['value']['password']:
+    payload = {
+        "e_mail":info_login['e_mail'],
+        "token":sh.hash(info_login['token'])
+    }
+    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
+    if info_login['e_mail'] in document and sh.verify(info_login['password'], doc['rows'][0]['value']):
+        database.save(payload)
         return {"User":"exists"}
     else:
         return {"Status":"Not done"}
