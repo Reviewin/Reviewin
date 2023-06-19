@@ -1,25 +1,20 @@
-uvicorn
-pydantic
-kivy
-kivymd
-requests
-couchdb
-json
-httplib
-hashlib
-fastapi
-typing
-uuid
-random
-PIL
-os
-aiofiles
-shutil
-regex
-captcha 
-bcrypt
-cProfile
-turtle
-unittest
-pickle
-math
+captcha (0.4)
+uuid 
+json 
+fastapi == 0.78.0)
+typing (3.7.4.3)
+aiofiles (22.1.0)
+PIL (non installé)
+shutil (non installé)
+uvicorn (0.18.2)
+smtplib (non installé)
+pydantic (1.9.1)
+requests (2.28.1)
+hashlib (non installé)
+regex (2022.7.9)
+couchdb (non installé)
+bcrypt (4.0.0)
+imghdr (non installé)
+random (non installé)
+passlib (1.7.4)
+os (non installé)

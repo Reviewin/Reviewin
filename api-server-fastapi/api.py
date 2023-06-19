@@ -379,9 +379,20 @@ async def verify_captcha_test(captcha: Recaptcha_2):
                 return True
         except(smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected):
             return False
+    def check_mx_records(domain: str)-> bool:
+        import dns.resolver
+        mx = []
+        try:
+            responses = dns.resolver.query(domain, 'MX')
+            mx = [str(r.exchange)[:-1] for r in responses]
+            print(mx)
+            return True
+        except dns.resolver.NoAnswer:
+            return False
+
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and check_server_mail(str(user_e_mail.split("@")[1])):
+        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and check_server_mail(str(user_e_mail.split("@")[1])) and check_mx_records(str(user_e_mail.split("@")[1])):
             if user_e_mail not in resp.text:
                 print(resp.json())
                 database_reviewin_users.save(payload)
