@@ -145,7 +145,7 @@ class com(BaseModel):
 
 
 #ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
-@api.post("/products")
+@api.post("/products", tags=["Products verification"])
 async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...), token: str = Form()):
     url = f'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="{token}"'
     response = requests.get(url)
@@ -183,7 +183,7 @@ async def create_upload_file(company: str = Form(),type_of_products: str =  Form
         return {"Status":"not done"}
 
 # acquérir les données selon un certain produit
-@api.post('/products/informations')
+@api.post('/products/informations',tags=['Endpoints of user display informations'])
 async def return_informations(product_informations: Product_informations):
     product_informations = product_informations.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_products/_design/product_desogn/_view/product_view?key="' + str(product_informations['product_id']) + '"'
@@ -196,7 +196,7 @@ async def return_informations(product_informations: Product_informations):
     else:
         return {"Status":"not done"}
 # pas encore opérationnel
-@api.post('/notations')
+@api.post('/notations', tags=['Notations'])
 async def notations(notations: notations):
     notations = notations.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + notations['token'] + '"'
@@ -222,7 +222,7 @@ async def notations(notations: notations):
         return {"User":"Not connected"}
 
 #pas encore opérationnel
-@api.post('/load_comments')
+@api.post('/load_comments', tags=['Endpoints of user display informations'])
 async def load_comments(com: com):
     com = com.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="' + com['token'] + '"'
@@ -243,7 +243,7 @@ async def load_comments(com: com):
         print("no")
 
 #supprimer un produit (pas encore de test coté db)
-@api.post('/delete')
+@api.post('/delete', tags=["Delete a product from app"])
 async def delete_products(partners: products_delete):
     partners = partners.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + partners['token'] + '"'
@@ -271,7 +271,7 @@ async def get_produtcts(id: str ):
     return _responses.FileResponse(image)
 
 #ancienne_fonction
-@api.get('/products')
+@api.get('/products', tags=["Old endpoint"])
 async def list_products():
     path = "C:/Users/33769/Desktop/Reviewin/api-server-fastapi"
     valid_extension = '.png'
@@ -285,7 +285,7 @@ async def list_products():
     return list_of_products
 
 #recevoir la liste des produits, d'abord une vérification que l'utilisateur est connecté, puis renvoyé une liste []
-@api.post('/products/list')
+@api.post('/products/list', tags=['Get the products'])
 async def list_products(products: condition_products):
     products = products.dict()
     path = "C:/Users/33769/Desktop/Reviewin"
@@ -312,7 +312,7 @@ async def list_products(products: condition_products):
         return {"Status":"Not Done"}
 
 
-@api.post('/reviewin_users')
+@api.post('/reviewin_users', tags=["Old endpoint"])
 async def sign_up(info__: User_register):
     info__ = info__.dict()
     user_e_mail = info__['e_mail']
@@ -333,7 +333,7 @@ async def sign_up(info__: User_register):
         return {"Status":"Not done"}
 
 
-@api.post('/logout')
+@api.post('/logout', tags=['Sessions'])
 async def logout(logout_: logoutf):
     logout_ = logout_.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + logout_['token'] + '"'
@@ -348,7 +348,7 @@ async def logout(logout_: logoutf):
     return {"Status":"Done"} 
 
 #sign-up officiel les autres endpoints ne sont que des crash tests
-@api.post('/accounts')
+@api.post('/accounts', tags=["Create Account"])
 async def verify_captcha_test(captcha: Recaptcha_2):
     captcha = captcha.dict()
     print(captcha)
@@ -409,7 +409,7 @@ async def verify_captcha_test(captcha: Recaptcha_2):
         print('Invalid captcha')
         return {"Not good captcha":"don't let sign up"}
 
-@api.post('/signup')
+@api.post('/signup', tags=["Old endpoint"])
 async def signup(User: User):
     User = User.dict()
     captcha_value = User['recaptcha_value']
@@ -437,7 +437,7 @@ async def signup(User: User):
     else:
         return {"Invalid":"captcha"}
 
-@api.post('/load')
+@api.post('/load', tags=['Endpoints of user display informations'])
 async def load_(load_data: load_):
     load_data = load_data.dict()
     url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ sh.hash(load_data['token'])+ '"'
@@ -454,7 +454,7 @@ async def load_(load_data: load_):
     return document_return
 
 
-@api.post('/users')
+@api.post('/users', tags=["Old endpoint"])
 async def test_verification(info_user: User_register):
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users/')
     info_user = info_user.dict()
@@ -466,7 +466,7 @@ async def test_verification(info_user: User_register):
         db.save(info_user)
 
 
-@api.get('/captcha')
+@api.get('/captcha', tags=['Captcha test'])
 async def return_image():
     ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
     a = random.choice(ac)
@@ -490,7 +490,7 @@ async def return_image():
     return _responses.FileResponse(random_source)
 
 
-@api.post('/sessions')
+@api.post('/sessions', tags=['Sessions'])
 async def sessions(user_session: sessions):
     user_session = user_session.dict()
     url_db = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key="'+ user_session['e_mail'] + '"'
@@ -517,7 +517,7 @@ async def sessions(user_session: sessions):
     #return {"Session":"created"}
 
 
-@api.post('/loginn')
+@api.post('/loginn',tags=['Sessions'])
 async def log_in(info_login: UserLogin):
     info_login = info_login.dict()
     email = info_login['e_mail']
@@ -537,7 +537,7 @@ async def log_in(info_login: UserLogin):
     else:
         return {"Status":"Not done"}
 
-@api.get("/test")
+@api.get("/test", tags=['Old endpoint'])
 def return_test():
     return {"test":'passed'}
 if __name__ == '__main__':
