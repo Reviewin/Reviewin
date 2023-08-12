@@ -18,7 +18,7 @@ import fastapi.responses as _responses
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
+from fastapi import Request
 from pydantic import BaseModel
 
 from typing import Union
@@ -35,6 +35,9 @@ import hashlib
 
 import passlib
 from passlib.hash import pbkdf2_sha256 as sh
+
+import ipaddress
+
 api = FastAPI() #on instancie 
 
 #ici nous avons majoritairement les modèles de données qui nous servirons plus tard
@@ -240,7 +243,7 @@ async def load_comments(com: com):
         print(list_of_comments)
         return list_of_comments
     else:
-        print("no")
+        return {"Status":"Not done"}
 
 #supprimer un produit (pas encore de test coté db)
 @api.post('/delete', tags=["Delete a product from app"])
@@ -311,7 +314,6 @@ async def list_products(products: condition_products):
     else:
         return {"Status":"Not Done"}
 
-
 @api.post('/reviewin_users', tags=["Old endpoint"])
 async def sign_up(info__: User_register):
     info__ = info__.dict()
@@ -332,7 +334,6 @@ async def sign_up(info__: User_register):
     else:
         return {"Status":"Not done"}
 
-
 @api.post('/logout', tags=['Sessions'])
 async def logout(logout_: logoutf):
     logout_ = logout_.dict()
@@ -349,7 +350,7 @@ async def logout(logout_: logoutf):
 
 #sign-up officiel les autres endpoints ne sont que des crash tests
 @api.post('/accounts', tags=["Create Account"])
-async def verify_captcha_test(captcha: Recaptcha_2):
+async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
     captcha = captcha.dict()
     print(captcha)
     captcha_value = captcha['captcha_value']
@@ -359,19 +360,31 @@ async def verify_captcha_test(captcha: Recaptcha_2):
     user_e_mail = captcha['email']
     url_e_mail = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key="'+ user_e_mail + '"'
     resp = requests.get(url_e_mail)
+    print(request.headers.get("X-Forwarded-For",request.client.host))
+    print(request.headers.get("User-Agent"))
+    print(request.headers)
     payload = {
         "age":captcha['age'],
         "country":captcha['country'],
         "email":captcha['email'],
         "gender":captcha['gender'],
         "password":sh.hash(str(captcha['password'])), #on hashe le mot de passe 
+        "client": str(request.headers.get("User-Agent")),
+        "ip": sh.hash(str(request.headers.get("X-Forwarded-For", request.client.host))),
         "points":captcha['points'],
+        "language":str(request.headers.get("accept-language"[0:2]))
     }
     database_reviewin_users = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_users')
     pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
     list_of_genders = ['M', 'F']
     doc = resp.json()
     document = ma_variable.json()
+    def valid_ip(ip)->bool:
+        try:
+            ipaddress.ip_address(ip)
+            return True
+        except ValueError:
+            return False
     def check_server_mail(domain: str) -> bool:
         import smtplib
         try:
@@ -389,10 +402,9 @@ async def verify_captcha_test(captcha: Recaptcha_2):
             return True
         except dns.resolver.NoAnswer:
             return False
-
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and check_server_mail(str(user_e_mail.split("@")[1])) and check_mx_records(str(user_e_mail.split("@")[1])):
+        if re.search(pattern, captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and check_server_mail(str(user_e_mail.split("@")[1])) and check_mx_records(str(user_e_mail.split("@")[1])) and ip_address(request.hearders.get("X-Forwarded-For", request.client.host)):
             if user_e_mail not in resp.text:
                 print(resp.json())
                 database_reviewin_users.save(payload)
@@ -528,6 +540,7 @@ async def log_in(info_login: UserLogin):
     doc = res.json()
     payload = {
         "e_mail":info_login['e_mail'],
+        "password":sh.hash(info_login["password"]),
         "token":sh.hash(info_login['token'])
     }
     database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
