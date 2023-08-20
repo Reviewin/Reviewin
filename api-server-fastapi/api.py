@@ -13,6 +13,8 @@ import requests
 
 import uvicorn
 
+import subprocess
+
 from fastapi import FastAPI, File, Form, Request, responses, UploadFile
 import fastapi.responses as _responses
 from fastapi.responses import HTMLResponse
@@ -480,6 +482,7 @@ async def test_verification(info_user: User_register):
 
 @api.get('/captcha', tags=['Captcha test'])
 async def return_image():
+    import datetime
     ac  = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','1','2','3','4','5','6','7','8','9','10','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
     a = random.choice(ac)
     b = random.choice(ac)
@@ -492,14 +495,14 @@ async def return_image():
     random_string = a + b + c + d + f + g + h
     captcha_value = json.dumps(random_string)
     print(captcha_value)
-    json_object = {"captcha_value":str(captcha_value)}
+    json_object = {"captcha_value":str(captcha_value), "day":str(datetime.datetime.now().day), "hour":str(datetime.datetime.now().hour), "second": str(datetime.datetime.now().second)}
     db = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
     db.save(json_object)
     random_source = random_string + '.png'
     image = ImageCaptcha(width=600, height=400)
     gen = image.generate_image(random_string)
-    gen_1 = gen.save(random_source)
-    return _responses.FileResponse(random_source)
+    gen_1 = gen.save(f"C:/Users/33769/Desktop/Images_Captcha/{random_source}")
+    return _responses.FileResponse(f'C:/Users/33769/Desktop/Images_Captcha/{random_source}')
 
 
 @api.post('/sessions', tags=['Sessions'])
@@ -555,3 +558,8 @@ def return_test():
     return {"test":'passed'}
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2223)
+    try:
+        subprocess.run(['python',"C:/Users/33769/Documents/Github/Reviewin/api-server-fastapi/script.py"])
+        print("Done")
+    except subprocess.CalledProcessError as e:
+        print(f"Une erreur de type {e} est survenue")
