@@ -1,19 +1,13 @@
 #import os
 #os.system("uvicorn api:api --reload")
-import string
-import random
-print(list(string.ascii_letters))
+import couchdb
+import requests
+n = 0
+for i in range(50):
+    res = requests.get('http://127.0.0.1:2223/captcha')
+    if res.status_code == 200:
+        n = n + 1
+        print(n)
+    else:
+        exit()
 
-
-list_of_passwords = []
-for i in range(len(list(string.ascii_letters))):
-    password = []
-    for i in range(8):
-        password.append(list(string.ascii_letters)[random.randint(1,26)])
-        list_of_passwords.append(password)
-    print(list_of_passwords)
-    final_list = []
-    for i in range(len(list_of_passwords)):
-        interim = ''.join(list_of_passwords[i])
-        final_list.append(interim)
-    print(final_list)
