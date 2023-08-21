@@ -1,7 +1,10 @@
 from couchdb import Server, design
-
+import importlib.util
+module_spec = importlib.util.spec_from_file_location('config', 'C:/Users/33769/Desktop/config/config.py')
+module = importlib.util.module_from_spec(module_spec)
+module_spec.loader.exec_module(module)
 # Connect to CouchDB server
-couch = Server('http://admin:kolea21342@127.0.0.1:5984/')
+couch = Server('http://{module.username}:{module.password}@127.0.0.1:5984/')
 
 # Create databases
 if 'reviewinn_users' not in couch:

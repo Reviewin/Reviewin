@@ -28,6 +28,8 @@ from typing import Optional
 
 import couchdb
 
+from starlette.middleware.base import BaseHTTPMiddleware
+
 import captcha 
 from captcha.image import ImageCaptcha
 
@@ -43,6 +45,7 @@ import ipaddress
 api = FastAPI() #on instancie 
 
 #ici nous avons majoritairement les modèles de données qui nous servirons plus tard
+
 class logout(BaseModel):
     e_mail: str
 
@@ -148,11 +151,26 @@ class com(BaseModel):
     product_id: str 
 
 
+class AdminRegister(BaseModel):
+    password: str
+    email: str
+    name_company: str
+    phone_number: str
+    address: str
+    nationality: str
+    type_of_company: str
+    description: str
+    contract: str
+
+import importlib.util
+module_spec = importlib.util.spec_from_file_location('config', 'C:/Users/33769/Desktop/config/config.py')
+module = importlib.util.module_from_spec(module_spec)
+module_spec.loader.exec_module(module)
 
 #ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
 @api.post("/products", tags=["Products verification"])
 async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...), token: str = Form()):
-    url = f'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="{token}"'
+    url = f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="{token}"'
     response = requests.get(url)
     doc = response.json()
     import imghdr
@@ -167,17 +185,26 @@ async def create_upload_file(company: str = Form(),type_of_products: str =  Form
             print(imghdr.what(None, h=file.file.read()))
             random_id = str(uuid.uuid4()) + '.png'
             file.filename = str(random_id)
-            #données à envoyer à la db 
+            #données à envoyer à la db
+            try:
+                import datetime
+            except ModuleNotFoundError as m:
+                return False 
             payload = {
                 "type_of_products":json.dumps(type_of_products).replace('"',''),
                 "company":json.dumps(company).replace('"',''),
                 "informations":json.dumps(informations).replace('"',''),
-                "product_id":str(random_id).replace('.png', '')
+                "product_id":str(random_id).replace('.png', ''),
+                "year": datetime.datetime.now().year,
+                "day":datetime.datetime.now().day,
+                "hour":datetime.datetime.now().hour,
+                "minute":datetime.datetime.now().minute,
+                "second":datetime.datetime.now().second
             }
             print(payload)
-            database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_products')
+            database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_products')
             database.save(payload)
-            file_location = f"C:/Users/33769/Desktop/Reviewin/{file.filename}"
+            file_location = f"C:/Users/33769/Desktop/Images_Captcha/{file.filename}"
             valid_formats = ['bmp', 'jpeg', 'png', 'svg']
             with open(file_location, "wb+") as file_object:
                 file_object.write(file.file.read())
@@ -191,8 +218,8 @@ async def create_upload_file(company: str = Form(),type_of_products: str =  Form
 @api.post('/products/informations',tags=['Endpoints of user display informations'])
 async def return_informations(product_informations: Product_informations):
     product_informations = product_informations.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_products/_design/product_desogn/_view/product_view?key="' + str(product_informations['product_id']) + '"'
-    url_verif = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + str(product_informations['token']) + '"'
+    url = f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_products/_design/product_desogn/_view/product_view?key="' + str(product_informations['product_id']) + '"'
+    url_verif = f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + str(product_informations['token']) + '"'
     response = requests.get(url_verif)
     doc = response.json()
     if sh.hash(product_informations['token']) in doc:
@@ -204,22 +231,33 @@ async def return_informations(product_informations: Product_informations):
 @api.post('/notations', tags=['Notations'])
 async def notations(notations: notations):
     notations = notations.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + notations['token'] + '"'
-    url_for_notations = 'http://admin:kolea21342@127.0.0.1:5984/products_notations/_design/design_notations/_view/view_notations?key="' + notations['product_id'] + '"'
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/product_notations')
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + notations['token'] + '"'
+    url_for_notations = 'http://{module.username}:{module.password}@127.0.0.1:5984/products_notations/_design/design_notations/_view/view_notations?key="' + notations['product_id'] + '"'
+    database = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/product_notations')
     payload = {
         'product_id':notations['product_id'],
         "email":notations['e_mail'],
         "age":notations['age'],
         "gender":notations['gender'],
-        "country":notations['country']
-        
+        "country":notations['country'],
+        "year": datetime.datetime.now().year,
+        "day":datetime.datetime.now().day,
+        "hour":datetime.datetime.now().hour,
+        "minute":datetime.datetime.now().minute,
+        "second":datetime.datetime.now().second
     }
     if notations['token'] in requests.get(url).json():
         if notations['e_mail'] not in requests.get(url_for_notations).json():
-            print('update number of points')
-            return {"Status":"Done"}
             #update le nombre de points dans la db users
+            print('update number of points')
+            response = requests.get(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/update-points?key="{notations["email"]}"')
+            database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users')
+            id = response.json()['rows'][0]["id"]
+            document = database[id]
+            key = "points"
+            document[key] = document[key] + 5
+            database[id] = document
+            return {"Status":"Done"}
         else:
             print('user already reviewed')
             return {"Status":"Not done"}
@@ -230,8 +268,8 @@ async def notations(notations: notations):
 @api.post('/load_comments', tags=['Endpoints of user display informations'])
 async def load_comments(com: com):
     com = com.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="' + com['token'] + '"'
-    url_view_products = 'http://admin:kolea21342@127.0.0.1:5984/products_notations/_design/design_notations/_view/comments?key="' + com['product_id'] + '"'
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="' + com['token'] + '"'
+    url_view_products = 'http://{module.username}:{module.password}@127.0.0.1:5984/products_notations/_design/design_notations/_view/comments?key="' + com['product_id'] + '"'
     response = requests.get(url)
     list_of_comments = []
     if sh.hash(com['token']) in response.text:
@@ -251,20 +289,26 @@ async def load_comments(com: com):
 @api.post('/delete', tags=["Delete a product from app"])
 async def delete_products(partners: products_delete):
     partners = partners.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + partners['token'] + '"'
-    a = partners['token']
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + partners['token'] + '"'
+    token = partners['token']
     response = requests.get(url)
-    path = 'C:/Users/33769/Desktop/Reviewin'
-    path_2 = str(path + partners['partner_product_id'])
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/products')
+    product_id = partners['product_id']
+    path = f'C:/Users/33769/Desktop/Images_Captcha/{product_id}.png'
+    response = requests.get(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_products/_design/product_design/_view/product-delete/key="{product_id}"')
+    database = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_products')
+    document = response.json()
+    id = document['rows'][0]["value"]
     #création d'une vue pour récupérer l'id du document selon l'id du produit demandé.
     # url vue: 
     # requete vue
     # doc = requetevue.json() 
     os.listdir(path)
-    if a in response.json():
+    if token in response.json():
         if partners['partner_product'] in os.listdir(path):
             os.remove(path_2)
+            database.delete(database[str(id)])
+            if database.delete(database[str(id)]):
+                return {"Status":"Done"}
         else:
             return {"Product_id":"Not Valid"}
     else:
@@ -272,7 +316,7 @@ async def delete_products(partners: products_delete):
 #acquérir l'image d'un produit selon un id
 @api.get('/products/{id}')
 async def get_produtcts(id: str ):
-    image = f'C:/Users/33769/Desktop/Reviewin/api-server-fastapi/' + str(id).replace('"', '') +  '.png'
+    image = f"C:/Users/33769/Desktop/Images_Captcha/" + str(id).replace('"', '') + ".png"
     return _responses.FileResponse(image)
 
 #ancienne_fonction
@@ -298,7 +342,7 @@ async def list_products(products: condition_products):
     files = os.listdir(path)
     list_of_products = []
     valid_extension = '.png'
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ str(products['token']) + '"'
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ str(products['token']) + '"'
     res = requests.get(url)
     doc = res.json()
     print(res.text)
@@ -320,8 +364,8 @@ async def list_products(products: condition_products):
 async def sign_up(info__: User_register):
     info__ = info__.dict()
     user_e_mail = info__['e_mail']
-    url = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
-    db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users')
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
+    db = couchdb.Database('http://{module.username}:{module.password}@localhost:5984/reviewin_users')
     res = requests.get(url)
     gender_list = ['M', 'F']
     password_hash = sh.hash(info__['password'])
@@ -339,33 +383,35 @@ async def sign_up(info__: User_register):
 @api.post('/logout', tags=['Sessions'])
 async def logout(logout_: logoutf):
     logout_ = logout_.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + logout_['token'] + '"'
-    url_ = "http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=%22" + logout_['token'] + '%22'
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + logout_['token'] + '"'
+    url_ = "http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=%22" + logout_['token'] + '%22'
     response = requests.get(url_)
     doc = response.json()
     print(doc)
     id_ = doc['rows'][0]['id']
-    couch = couchdb.Server('http://admin:kolea21342@127.0.0.1:5984/')
-    db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions/')
+    couch = couchdb.Server('http://{module.username}:{module.password}@127.0.0.1:5984/')
+    db = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/sessions/')
     db.delete(db[str(id_)])
     return {"Status":"Done"} 
 
 #sign-up officiel les autres endpoints ne sont que des crash tests
 @api.post('/accounts', tags=["Create Account"])
 async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
+    import datetime
     captcha = captcha.dict()
     print(captcha)
     captcha_value = captcha['captcha_value']
-    url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/captcha_test/')
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
+    database = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/captcha_test/')
     ma_variable = requests.get(url)
     user_e_mail = captcha['email']
-    url_e_mail = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key="'+ user_e_mail + '"'
+    url_e_mail = 'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key="'+ user_e_mail + '"'
     resp = requests.get(url_e_mail)
     print(request.headers.get("X-Forwarded-For",request.client.host))
     print(request.headers.get("User-Agent"))
     print(request.headers)
     payload = {
+        "role":"consumer",
         "age":captcha['age'],
         "country":captcha['country'],
         "email":captcha['email'],
@@ -374,9 +420,14 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
         "client": str(request.headers.get("User-Agent")),
         "ip": sh.hash(str(request.headers.get("X-Forwarded-For", request.client.host))),
         "points":captcha['points'],
-        "language":str(request.headers.get("accept-language"[0:2]))
+        "language":str(request.headers.get("accept-language"[0:2])),
+        "year":datetime.datetime.now().year,
+        "day":datetime.datetime.now().day,
+        "hour":datetime.datetime.now().hour,
+        "minute":datetime.datetime.now().minute
+
     }
-    database_reviewin_users = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_users')
+    database_reviewin_users = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users')
     pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
     list_of_genders = ['M', 'F']
     doc = resp.json()
@@ -411,7 +462,7 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
                 print(resp.json())
                 database_reviewin_users.save(payload)
                 captcha_file = str(captcha['captcha_value']) + '.png'
-                os.remove(captcha_file)
+                os.remove(f"C:/Users/33769/Desktop/Images_Captcha/{captcha_file}.png")
                 id_ = document['rows'][0]['id']
                 database.delete(database[str(id_)])
                 return {"Captcha":"good let sign up"}
@@ -427,11 +478,11 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
 async def signup(User: User):
     User = User.dict()
     captcha_value = User['recaptcha_value']
-    url = 'http://admin:kolea21342@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/captcha_test/_design/Captchadoc/_view/captcha_test?key=' + "%22\%22" + captcha_value + "\%22%22"
     user_e_mail = User['email']
-    url_e_mail = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
+    url_e_mail = 'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/Users?key=' + '"' + user_e_mail + '"'
     resp = requests.get(url)
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/reviewin_users')
+    database = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users')
     response = requests.get(url_e_mail)
     payload = {
         "age":User['age'],
@@ -454,7 +505,7 @@ async def signup(User: User):
 @api.post('/load', tags=['Endpoints of user display informations'])
 async def load_(load_data: load_):
     load_data = load_data.dict()
-    url = 'http://admin:kolea21342@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ sh.hash(load_data['token'])+ '"'
+    url = 'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key="'+ sh.hash(load_data['token'])+ '"'
     res = requests.get(url)
     doc = res.json()
     document_return = {
@@ -470,9 +521,9 @@ async def load_(load_data: load_):
 
 @api.post('/users', tags=["Old endpoint"])
 async def test_verification(info_user: User_register):
-    db = couchdb.Database('http://admin:kolea21342@localhost:5984/reviewin_users/')
+    db = couchdb.Database('http://{module.username}:{module.password}@localhost:5984/reviewin_users/')
     info_user = info_user.dict()
-    res = requests.get('http://admin:kolea21342@localhost:5984/reviewin_users/_all_docs?include_docs=true')
+    res = requests.get('http://{module.username}:{module.password}@localhost:5984/reviewin_users/_all_docs?include_docs=true')
     print(res.text)
     if info_user["e_mail"] in res.text:
         return {"e_mail":"already used"}
@@ -491,30 +542,30 @@ async def return_image():
     f = random.choice(ac)
     g = random.choice(ac)
     h = random.choice(ac)
-    url = 'http://admin:kolea21342@localhost:5984/captcha_test'
+    url = 'http://{module.username}:{module.password}@localhost:5984/captcha_test'
     random_string = a + b + c + d + f + g + h
     captcha_value = json.dumps(random_string)
     print(captcha_value)
-    json_object = {"captcha_value":str(captcha_value), "day":str(datetime.datetime.now().day), "hour":str(datetime.datetime.now().hour), "second": str(datetime.datetime.now().second)}
-    db = couchdb.Database('http://admin:kolea21342@localhost:5984/captcha_test')
+    json_object = {"captcha_value":str(captcha_value), "year": str(datetime.datetime.now().year),"day":str(datetime.datetime.now().day), "hour":str(datetime.datetime.now().hour), "second": str(datetime.datetime.now().second)}
+    db = couchdb.Database('http://{module.username}:{module.password}@localhost:5984/captcha_test')
     db.save(json_object)
     random_source = random_string + '.png'
     image = ImageCaptcha(width=600, height=400)
     gen = image.generate_image(random_string)
     gen_1 = gen.save(f"C:/Users/33769/Desktop/Images_Captcha/{random_source}")
-    return _responses.FileResponse(f'C:/Users/33769/Desktop/Images_Captcha/{random_source}')
+    return _responses.FileResponse(f'C:/Users/33769/Desktop/Images_Captcha/{random_source}.png')
 
 
 @api.post('/sessions', tags=['Sessions'])
 async def sessions(user_session: sessions):
     user_session = user_session.dict()
-    url_db = 'http://admin:kolea21342@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key="'+ user_session['e_mail'] + '"'
+    url_db = 'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/login?key="'+ user_session['e_mail'] + '"'
     res = requests.get(url_db)
     document_ = res.json()
     print(document_)
     print(res.text)
     doc = res.text
-    db = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
+    db = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/sessions')
     document = {
         "e_mail": user_session['e_mail'],
         "token": sh.hash(user_session['token']),
@@ -536,7 +587,7 @@ async def sessions(user_session: sessions):
 async def log_in(info_login: UserLogin):
     info_login = info_login.dict()
     email = info_login['e_mail']
-    url = f'http://admin:kolea21342@localhost:5984/reviewin_users/_design/design_users/_view/login?key="{email}"'
+    url = f'http://{module.username}:{module.password}@localhost:5984/reviewin_users/_design/design_users/_view/login?key="{email}"'
     res = requests.get(url)
     document = res.text
     print(document)
@@ -544,22 +595,24 @@ async def log_in(info_login: UserLogin):
     payload = {
         "e_mail":info_login['e_mail'],
         "password":sh.hash(info_login["password"]),
-        "token":sh.hash(info_login['token'])
+        "token":sh.hash(info_login['token']),
+        "gender": doc["rows"][0]["value"]["gender"],
+        
     }
-    database = couchdb.Database('http://admin:kolea21342@127.0.0.1:5984/sessions')
+    database = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/sessions')
     if info_login['e_mail'] in document and sh.verify(info_login['password'], doc['rows'][0]['value']):
         database.save(payload)
         return {"User":"exists"}
     else:
         return {"Status":"Not done"}
 
+@api.post("/add-admin")
+async def add_admin():
+    pass
+
 @api.get("/test", tags=['Old endpoint'])
 def return_test():
     return {"test":'passed'}
+
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2223)
-    try:
-        subprocess.run(['python',"C:/Users/33769/Documents/Github/Reviewin/api-server-fastapi/script.py"])
-        print("Done")
-    except subprocess.CalledProcessError as e:
-        print(f"Une erreur de type {e} est survenue")
