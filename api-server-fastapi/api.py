@@ -425,7 +425,6 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
         "day":datetime.datetime.now().day,
         "hour":datetime.datetime.now().hour,
         "minute":datetime.datetime.now().minute
-
     }
     database_reviewin_users = couchdb.Database('http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users')
     pattern = '^[a-z 0-9]+[\._]?[a-z 0-9]+[@]\w+[.]\w{2,3}$'
