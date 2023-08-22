@@ -1,13 +1,24 @@
 
+
 def services(database_name, payload: dict):
     database_name.save(payload)
 
-import pycountry
-from pycountry import countries
-
-final_list_of_countries_imported_uwu = []
-for i in range(len(pycountry.countries)):
-    list_of_countries.append(list(pycountry.countries)[i].name.upper())
-    
-print(final_list_of_countries_imported_uwu)
+def choose_country()->str:
+    import random 
+    import pycountry
+    from pycountry import countries
+    final_list_of_countries_imported_uwu = []
+    for i in range(len(pycountry.countries)):
+        final_list_of_countries_imported_uwu.append(list(pycountry.countries)[i].name.upper())
+    return final_list_of_countries_imported_uwu[random.randint(0, len(final_list_of_countries_imported_uwu))]
+def generate_password():
+    import string
+    import random 
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for _ in range(random.randint(0,8)))
+    return password
+def generate_random_ip()->str:
+    import random
+    ip = ".".join(str(random.randint(0, 255)) for _ in range(4))
+    return ip
 
