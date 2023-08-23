@@ -469,9 +469,14 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
         return final_list_of_countries_imported_uwu
     domain = captcha["email"].split("@")[1]
     print(resp.json())
+    country_upper = captcha["country"].upper()
+    print(validate_email(captcha['email']))
+    print(len(check_mx_records(domain)) > 0)
+    print(check_server_mail(check_mx_records(domain)))
+    print(country_upper in _list_countries())
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if validate_email(captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and len(check_mx_records(domain)) > 0 and check_server_mail(check_mx_records(domain)) and captcha["country"].upper() in _list_countries():
+        if validate_email(captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and len(check_mx_records(domain)) > 0 and check_server_mail(check_mx_records(domain)) and country_upper in _list_countries():
             if user_e_mail not in resp.text and sh.hash(payload["ip"]) not in resp.text:
                 print(resp.json())
                 database_reviewin_users.save(payload)
