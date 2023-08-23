@@ -1,4 +1,12 @@
-
+def check_server_mail(domain: str) -> bool:
+    import smtplib
+    try:
+        with smtplib.SMTP(domain) as smtp:
+            print(f"There is a server mail behind {domain}")
+            return True
+    except(smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected):
+        print(f"There is not a server mail behind this domain {domain}")
+        return False
 
 def services(database_name, payload: dict):
     database_name.save(payload)
@@ -21,4 +29,26 @@ def generate_random_ip()->str:
     import random
     ip = ".".join(str(random.randint(0, 255)) for _ in range(4))
     return ip
+
+
+def valid_ip(ip)->bool:
+    import ipaddress
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except ValueError:
+        return False
+def check_mx_records(domain: str)-> list or bool:
+    import dns.resolver
+    mx = []
+    try:
+        responses = dns.resolver.resolve(domain, 'MX')
+        mx = [str(r.exchange)[:-1] for r in responses]
+        return mx
+    except dns.resolver.NoAnswer:
+        return False
+print(check_mx_records("gmail.com"))
+print(check_server_mail(str(check_mx_records("gmail.com")[0])))
+print(valid_ip("127.0.0.1"))
+
 
