@@ -29,15 +29,26 @@ domains = ["gmail.com", "yahoo.com", "outlook.com"]
 clients = ["Windows", "Android", "Iphone","Linux"]
 liste_gender = ["M","F"]
 for i in range(len(liste_email)):
+    import random 
+    import pycountry
+    from pycountry import countries
+    final_list_of_countries_imported_uwu = []
+    for loop in range(len(pycountry.countries)):
+        final_list_of_countries_imported_uwu.append(list(pycountry.countries)[loop].name.upper())
+    country = final_list_of_countries_imported_uwu[random.randint(0, len(final_list_of_countries_imported_uwu))]
+    import random
+    ip = ".".join(str(random.randint(0, 255)) for _ in range(4))
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for _ in range(random.randint(0,8)))
     payload = {
         "role":"consumer",
         "age":random.randint(17,100),
-        "country":str(choose_country),
+        "country":country,
         "email":f"{liste_email[i]}@",
         "gender":liste_gender[random.randint(0,len(liste_gender)-1)],
-        "password":sh.hash(str(generate_password())), #on hashe le mot de passe 
+        "password":sh.hash(password), #on hashe le mot de passe 
         "client": clients[random.randint(0, len(clients)-1)],
-        "ip": sh.hash(str(generate_random_ip())),#on hashe l'ip
+        "ip": sh.hash(str(ip)),#on hashe l'ip
         "points":0,
         "language":"fr",
         "year":datetime.datetime.now().year,
