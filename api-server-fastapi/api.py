@@ -449,9 +449,9 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
                 return False
         except(smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected):
             return False
-    def check_mx_records(domain: str)-> bool:
+    def check_mx_records(domain: str)-> bool or list:
         import dns.resolver
-        mx = []
+        mx = [] 
         try:
             responses = dns.resolver.resolve(domain, 'MX')
             mx = [str(r.exchange)[:-1] for r in responses]
@@ -459,17 +459,19 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
             return mx
         except dns.resolver.NoAnswer:
             return False
-    print(validate_email(captcha['email']))
-    print(int(captcha['age']) >= 16)
-    print(len(captcha['password']) >=8)
-    print(str(captcha['gender']) in list_of_genders)
-    domain = captcha['email'].split("@")[1]
-    print(captcha['email'].split("@")[1])
-    print(check_mx_records(domain))
-    print(check_server_mail(check_mx_records(domain)))
+    def _list_countries()->list:
+        import random 
+        import pycountry
+        from pycountry import countries
+        final_list_of_countries_imported_uwu = []
+        for i in range(len(pycountry.countries)):
+            final_list_of_countries_imported_uwu.append(list(pycountry.countries)[i].name.upper())
+        return final_list_of_countries_imported_uwu
+    domain = captcha["email"].split("@")[1]
+    print(resp.json())
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
-        if validate_email(captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and len(check_mx_records(domain)) > 0 and check_server_mail(check_mx_records(domain)):
+        if validate_email(captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and len(check_mx_records(domain)) > 0 and check_server_mail(check_mx_records(domain)) and captcha["country"].upper() in _list_countries():
             if user_e_mail not in resp.text and sh.hash(payload["ip"]) not in resp.text:
                 print(resp.json())
                 database_reviewin_users.save(payload)
