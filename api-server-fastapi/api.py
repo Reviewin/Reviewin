@@ -231,33 +231,87 @@ async def return_informations(product_informations: Product_informations):
 @api.post('/notations', tags=['Notations'])
 async def notations(notations: notations):
     notations = notations.dict()
-    url = f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="' + notations['token'] + '"'
-    url_for_notations = f'http://{module.username}:{module.password}@127.0.0.1:5984/products_notations/_design/design_notations/_view/view_notations?key="' + notations['product_id'] + '"'
-    database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/product_notations')
-    payload = {
+    token = notations['token']
+    url = f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loadddatas?key="{token}"'
+    url_for_notations_like = f'http://{module.username}:{module.password}@127.0.0.1:5984/products_notations/_design/design_notations/_view/view_notations?key="' + notations['product_id'] + '"'
+    database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/products_notations')
+    payload_for_like = {
         'product_id':notations['product_id'],
         "email":notations['e_mail'],
         "age":notations['age'],
         "gender":notations['gender'],
         "country":notations['country'],
         "year": datetime.datetime.now().year,
+        "month":datetime.datetime.now().month,
         "day":datetime.datetime.now().day,
         "hour":datetime.datetime.now().hour,
         "minute":datetime.datetime.now().minute,
-        "second":datetime.datetime.now().second
+        "second":datetime.datetime.now().second,
+        "interactions":notations["interactions"],
+        "comments":notations["interactions"]
     }
-    if notations['token'] in requests.get(url).json():
-        if notations['e_mail'] not in requests.get(url_for_notations).json():
-            #update le nombre de points dans la db users
-            print('update number of points')
-            response = requests.get(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/update-points?key="{notations["email"]}"')
-            database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users')
-            id = response.json()['rows'][0]["id"]
-            document = database[id]
-            key = "points"
-            document[key] = document[key] + 5
-            database[id] = document
-            return {"Status":"Done"}
+    payload_for_comments = {
+        'product_id':notations['product_id'],
+        "email":notations['e_mail'],
+        "age":notations['age'],
+        "gender":notations['gender'],
+        "country":notations['country'],
+        "year": datetime.datetime.now().year,
+        "month":datetime.datetime.now().month,
+        "day":datetime.datetime.now().day,
+        "hour":datetime.datetime.now().hour,
+        "minute":datetime.datetime.now().minute,
+        "second":datetime.datetime.now().second,
+        "comments":notations["interactions"]
+    }
+    day = payload['day']
+    year = payload['year']
+    month = paylaod["month"]
+    date = {"date":f"{day}-{month}-{year}"}
+    payload.update(date)
+    #url pour vérifier que le produit n'a pas été noté 
+    url_verif = f'http://{module.username}:{module.password}@127.0.0.1:5984/products_notations/_design/product-notation/_view/product-notation/key="{date}"'
+    response_verif = requests.get(url_verif).json()
+    #url pour vérifier que le commentaire d'un utilisateur selon un produit n'existe pas, on fait une vue qui prend en clé un produit id et qui renvoie les commentaires
+    url_for_notations_comments = f'http://{module.username}:{password}@127.0.0.1:5984/products_notations/'
+    #compter la présence d'un email (str) dans un dictionnaire json
+    def compter_occurrences(dictionnaire: dict, chaine: str)->bool:
+        compte = 0
+        for valeur in dictionnaire.values():
+            compte += valeur.count(chaine)
+        if compte < 4:
+            return True
+        else:
+            return False
+    #définition des intéractions valides
+    valid_interactions = ["like", "dislike", "mid", None]
+    response_comments = requests.get(f'http://{module.username}:{module.password}@127.0.0.1:5984/products_notations/_design/product-notation/_view/product-notation?key="{email}"') 
+    if notations['token'] in requests.get(url).json() and notations["like"] in valid_interactions or len(notations["comments"]) > 0:
+        if notations['e_mail'] not in requests.get(url_for_notations_like).json() and compter_occurences(response_verif["rows"], payload["email"]):
+            #on distingue les cas où, seul une intéractions est envoyée ou seul un commentaire est envoyé
+            if notations["interactions"] in valid_interactions and len(notations["comments"]) == 0:
+                print('update number of points')
+                response = requests.get(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/update-points?key="{notations["email"]}"')
+                databasee = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users')
+                id = response.json()['rows'][0]["id"]
+                document = databasee[id]
+                key = "points"
+                document[key] = document[key] + 5
+                databasee[id] = document
+                database.save(payload_for_likes)
+                return {"Status":"Done"}
+        elif notations['e_mail'] not in response_comments.json() and compter_occurences(response_verif["rows"], payload["email"]) and len(notations["interactions"]) == 0:
+            if len(notations["interactions"]) == 0:
+                print('update number of points')
+                ___response___ = requests.get(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users/_design/design_users/_view/update-points?key="{notations["email"]}"')
+                ___database___ = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_users')
+                ___id___ = ___response___.json()['rows'][0]["id"]
+                ___document___ = databasee[id]
+                ___key___ = "points"
+                ___document___[___key___] = ___document___[___key___] + 5
+                ___database___[___id___] = ___document___
+                ___database___.save(payload_for_comments)
+                return {"Status":"Done"}
         else:
             print('user already reviewed')
             return {"Status":"Not done"}
@@ -443,19 +497,21 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
             for i in range(len(list_domain)):
                 with smtplib.SMTP(list_domain[i]) as smtp:
                     list_domains_available.append(list_domain[i])
+            print(len(list_domain))
+            print(len(list_domains_available))
             if len(list_domain) == len(list_domains_available):
                 return True
             else:
-                return False
+                return True #ça veut dire que les serveurs mail existent mais la connexion est possible mais refus de leur part. (donc fonctionnels) Cependant cela ne veut pas dire qu'ils ne sont pas fonctionnels. On a quand meme réussi à avoir une réponse.
         except(smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected):
-            return False
+            return False #non fonctionnels problèmes de connexion.
     def check_mx_records(domain: str)-> bool or list:
         import dns.resolver
         mx = [] 
         try:
             responses = dns.resolver.resolve(domain, 'MX')
             mx = [str(r.exchange)[:-1] for r in responses]
-            print(mx)
+            print(f"les enregistrements mx sont ceux ci {mx}")
             return mx
         except dns.resolver.NoAnswer:
             return False
@@ -468,12 +524,7 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
             final_list_of_countries_imported_uwu.append(list(pycountry.countries)[i].name.upper())
         return final_list_of_countries_imported_uwu
     domain = captcha["email"].split("@")[1]
-    print(resp.json())
     country_upper = captcha["country"].upper()
-    print(validate_email(captcha['email']))
-    print(len(check_mx_records(domain)) > 0)
-    print(check_server_mail(check_mx_records(domain)))
-    print(country_upper in _list_countries())
     if captcha_value in ma_variable.text:
         print('Valid Captcha')
         if validate_email(captcha['email']) and int(captcha['age']) >= 16 and len(captcha['password']) >=8 and captcha['points'] == 0 and str(captcha['gender']) in list_of_genders and len(check_mx_records(domain)) > 0 and check_server_mail(check_mx_records(domain)) and country_upper in _list_countries():
