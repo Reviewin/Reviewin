@@ -28,6 +28,7 @@ for i in range(len(response.json()['rows'])):
 domains = ["gmail.com", "yahoo.com", "outlook.com"]
 clients = ["Windows", "Android", "Iphone","Linux"]
 liste_gender = ["M","F"]
+endings = ["fr", 'dz', "en", "us"]
 for i in range(len(liste_email)):
     import random 
     import pycountry
@@ -44,7 +45,7 @@ for i in range(len(liste_email)):
         "role":"consumer",
         "age":random.randint(17,100),
         "country":country,
-        "email":f"{liste_email[i]}@",
+        "email":f"{liste_email[i]}@{domains[random.randint(0, len(domains) - 1)]}.{endings[random.randint(0, len(endings) - 1)]}",
         "gender":liste_gender[random.randint(0,len(liste_gender)-1)],
         "password":sh.hash(password), #on hashe le mot de passe 
         "client": clients[random.randint(0, len(clients)-1)],
@@ -59,3 +60,4 @@ for i in range(len(liste_email)):
     database.save(payload)
     print(f"{payload['email']}Saved")
 #création d'email full inscriptions
+response = requests.get(f"")
