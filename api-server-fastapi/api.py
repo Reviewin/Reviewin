@@ -60,6 +60,8 @@ class UserLogin(BaseModel):
     token: str
 
 class logoutf(BaseModel):
+    email: str
+    password: str
     token: str
 
 class load_(BaseModel):
@@ -204,7 +206,7 @@ async def create_upload_file(company: str = Form(),type_of_products: str =  Form
             print(payload)
             database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_products')
             database.save(payload)
-            file_location = f"C:/Users/33769/Desktop/Images_Captcha/{file.filename}"
+            file_location = f"C:/Users/33769/Desktop/Reviewin_Products/{file.filename}"
             valid_formats = ['bmp', 'jpeg', 'png', 'svg']
             with open(file_location, "wb+") as file_object:
                 file_object.write(file.file.read())
@@ -391,7 +393,7 @@ async def list_products():
 @api.post('/products/list', tags=['Get the products'])
 async def list_products(products: condition_products):
     products = products.dict()
-    path = "C:/Users/33769/Desktop/Reviewin"
+    path = "C:/Users/33769/Desktop/Reviewin_Products"
     valid_extension = '.png'
     files = os.listdir(path)
     list_of_products = []
@@ -436,17 +438,20 @@ async def sign_up(info__: User_register):
 
 @api.post('/logout', tags=['Sessions'])
 async def logout(logout_: logoutf):
-    logout_ = logout_.dict()
-    url = f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + logout_['token'] + '"'
-    url_ = f"http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=%22" + logout_['token'] + '%22'
-    response = requests.get(url_)
-    doc = response.json()
-    print(doc)
-    id_ = doc['rows'][0]['id']
-    couch = couchdb.Server(f'http://{module.username}:{module.password}@127.0.0.1:5984/')
-    db = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/')
-    db.delete(db[str(id_)])
-    return {"Status":"Done"} 
+    try:
+        logout_ = logout_.dict()
+        url = f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=' + '"' + logout_['token'] + '"'
+        url_ = f"http://{module.username}:{module.password}@127.0.0.1:5984/sessions/_design/sessions/_view/loaddatas?key=%22" + logout_['token'] + '%22'
+        response = requests.get(url_)
+        doc = response.json()
+        print(doc)
+        id_ = doc['rows'][0]['id']
+        couch = couchdb.Server(f'http://{module.username}:{module.password}@127.0.0.1:5984/')
+        db = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions/')
+        db.delete(db[str(id_)])
+        return {"Status":"Done"}
+    except Exception as e:
+        print(Exception) 
 
 #sign-up officiel les autres endpoints ne sont que des crash tests
 @api.post('/accounts', tags=["Create Account"])
