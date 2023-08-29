@@ -143,3 +143,10 @@ print(f"Ceci est le test avec la fonction check_server_mail {test_fonction_check
 print(f"Ceci est le test avec la fonction attempt {test_fonction_attempt}")
 check =check_mx_records("ent.auvergnerhonealpes.fr")
 print(f"le check des mx est celui ci {check}")
+try:
+    import smtplib
+    with smtplib.SMTP(str(check[0])) as smtp:
+        smtp.connect("ayoub.semsar@ent.auvergnerhonealpes.fr","kolea21342")
+except:
+    print("Not done")
+
