@@ -15,7 +15,7 @@ function to reload the products (Done)
 
 function to load comments for each products (done)
 
-notations (half done)
+notations (done in theory, not tested)
 
 Web App with flet (currently working on it)
 
