@@ -24,7 +24,8 @@ countriess = list(dict_country.keys())
 print(countingss)
 print(countriess)
 print(len(dict_country))
-
+print(countriess[0:10])
+print(countingss[0:10])
 
 #done_for = 0
 #frequencies = []

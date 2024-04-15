@@ -163,7 +163,7 @@ class AdminRegister(BaseModel):
     type_of_company: str
     description: str
     contract: str
-
+print(os.getcwd())
 import importlib.util
 module_spec = importlib.util.spec_from_file_location('config', 'C:/Users/33769/Desktop/config/config.py')
 module = importlib.util.module_from_spec(module_spec)
@@ -177,22 +177,25 @@ async def create_upload_file(company: str = Form(),type_of_products: str =  Form
     doc = response.json()
     import imghdr
     valid_formats = ['bmp', 'jpeg', 'png', 'svg']
+    print(valid_formats)
     def not_empty(string:str) -> bool:
         if len(string) != 0:
             return True
         else:
             return False
-    if not_empty(str(company)) and not_empty(str(type_of_products)) and not_empty(str(informations)) and doc['rows'][0]['key'] == "partner" and doc['rows'][0]['value'] == token:
-        if imghdr.what(None, h=file.file.read()) in valid_formats:
-            print(imghdr.what(None, h=file.file.read()))
-            random_id = str(uuid.uuid4()) + '.png'
-            file.filename = str(random_id)
+    #if not_empty(str(company)) and not_empty(str(type_of_products)) and not_empty(str(informations)) and doc['rows'][0]['key'] == "partner" and doc['rows'][0]['value'] == token:
+    print(imghdr.what(file, h=file.file.read()))
+    if imghdr.what(file, h=file.file.read()) in valid_formats:
+        print('Ok')
+        print(imghdr.what(file, h=file.file.read()))
+        random_id = str(uuid.uuid4()) + '.png'
+        file.filename = str(random_id)
             #données à envoyer à la db
-            try:
-                import datetime
-            except ModuleNotFoundError as m:
-                return False 
-            payload = {
+        try:
+            import datetime
+        except ModuleNotFoundError as m:
+            return False 
+        payload = {
                 "type_of_products":json.dumps(type_of_products).replace('"',''),
                 "company":json.dumps(company).replace('"',''),
                 "informations":json.dumps(informations).replace('"',''),
@@ -203,18 +206,18 @@ async def create_upload_file(company: str = Form(),type_of_products: str =  Form
                 "minute":datetime.datetime.now().minute,
                 "second":datetime.datetime.now().second
             }
-            print(payload)
-            database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_products')
-            database.save(payload)
-            file_location = f"C:/Users/33769/Desktop/Reviewin_Products/{file.filename}"
-            valid_formats = ['bmp', 'jpeg', 'png', 'svg']
-            with open(file_location, "wb+") as file_object:
-                file_object.write(file.file.read())
+        print(payload)
+        database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/reviewin_products')
+        database.save(payload)
+        file_location = f"C:/Users/33769/Desktop/Reviewin_Products/{file.filename}"
+        valid_formats = ['bmp', 'jpeg', 'png', 'svg']
+        with open(file_location, "wb+") as file_object:
+            file_object.write(file.file.read())
             return {"info": f"file '{file.filename}' saved at '{file_location}'"}
-        else:
-            return {"Bad":"format"}
     else:
-        return {"Status":"not done"}
+        return {"Bad":f"format {imghdr.what(file, h=file.file.read())}"}
+    #else:
+        #return {"Status":"not done"}
 
 # acquérir les données selon un certain produit
 @api.post('/products/informations',tags=['Endpoints of user display informations'])
@@ -542,8 +545,13 @@ async def verify_captcha_test(captcha: Recaptcha_2, request: Request):
                 database.delete(database[str(id_)])
                 return {"Captcha":"good let sign up"}
             else:
+                import time
+                time.sleep(200)
+                #pour faire chier les gens qui veulent se réinscrire ou qui voudrait spam
                 return {"User":"already exists"}
         else:
+            import time
+            time.sleep(5)
             return {"Syntax or informations":"Invalid"}
     else:
         print('Invalid captcha')
@@ -654,6 +662,8 @@ async def sessions(user_session: sessions):
         db.save(document)
         return {"Session":"created"}
     else:
+        import time
+        time.sleep(7)
         return {"Session":"not created"}
     #db.save(document)
     #return {"Session":"created"}
@@ -680,15 +690,69 @@ async def log_in(info_login: UserLogin):
         database.save(payload)
         return {"User":"exists"}
     else:
+        import time
+        time.sleep(7)
         return {"Status":"Not done"}
 
 @api.post("/add-admin")
-async def add_admin():
+async def add_admin(admin :AdminRegister):
+    import pycountry
+    from pycountry import countries
+    domain = admin["email"].split("@")[1]
+    password = admin["password"]
+    description = admin["description"]
+    countries_list = [list(countries)[i].name for i in range(len(list(countries)))]
+    def check_server_mx_records(list_domain: list) -> bool:
+        import smtplib
+        list_domains_available = []
+        try:
+            for i in range(len(list_domain)):
+                with smtplib.SMTP(list_domain[i]) as smtp:
+                    list_domains_available.append(list_domain[i])
+            print(len(list_domain))
+            print(len(list_domains_available))
+            if len(list_domain) == len(list_domains_available):
+                return True
+            else:
+                return True #ça veut dire que les serveurs mail existent mais la connexion est possible mais refus de leur part. (donc fonctionnels) Cependant cela ne veut pas dire qu'ils ne sont pas fonctionnels. On a quand meme réussi à avoir une réponse.
+        except(smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected):
+            return False #non fonctionnels problèmes de connexion.
+    def check_mx_records_server(domain: str)-> bool or list:
+        import dns.resolver
+        mx = [] 
+        try:
+            responses = dns.resolver.resolve(domain, 'MX')
+            mx = [str(r.exchange)[:-1] for r in responses]
+            print(f"les enregistrements mx sont ceux ci {mx}")
+            return mx
+        except dns.resolver.NoAnswer:
+            return False
+    date_info = requests.get("https://www.timeapi.io/api/TimeZone/zone?timeZone=Europe/Amsterdam")
+    informations = {
+        "company_demand_id":str(uuid.uuid4()),
+        "email":admin["email"],
+        "domain":admin["domain"],
+        "description":admin["description"],
+        "hour":date_info["currentLocalTime"]
+    }
+    #exigences d'une description complète, + de 50 caractères
+    if len(description) > 50 and check_mx_records_server(domain) and check_server_mx_records(check_mx_records_server(domain)):
+        database_admin = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/demande_admin')
+        database_admin.save(informations)
+    else:
+        return {False}
+#Fonction du haut, on pourrait éventuellement rajouter une base de données pour les réfusés afin qu'ils ne soient plus rajoutés dans la base des demandeurs.
+#@api.get("/admin/{product_id}/information")
+#async def get_data()
+@api.get('/demands')
+async def return_demands():
     pass
 
 @api.get("/test", tags=['Old endpoint'])
 def return_test():
     return {"test":'passed'}
+
+
 
 if __name__ == '__main__':
     uvicorn.run(api, host= '127.0.0.1', port= 2223)
