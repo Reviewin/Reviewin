@@ -28,6 +28,8 @@ from typing import Optional
 
 import couchdb
 
+import sys
+
 from starlette.middleware.base import BaseHTTPMiddleware
 
 import captcha 
@@ -163,12 +165,13 @@ class AdminRegister(BaseModel):
     type_of_company: str
     description: str
     contract: str
+    password_ : str
 print(os.getcwd())
 import importlib.util
 module_spec = importlib.util.spec_from_file_location('config', 'C:/Users/33769/Desktop/config/config.py')
 module = importlib.util.module_from_spec(module_spec)
 module_spec.loader.exec_module(module)
-
+print(sys.argv)
 #ajout de produit, on passe les informations dans le corps de la requete puis on enregitre le produit dans la db  
 @api.post("/products", tags=["Products verification"])
 async def create_upload_file(company: str = Form(),type_of_products: str =  Form(),informations: str = Form(),file: UploadFile = File(...), token: str = Form()):
@@ -668,7 +671,6 @@ async def sessions(user_session: sessions):
     #db.save(document)
     #return {"Session":"created"}
 
-
 @api.post('/loginn',tags=['Sessions'])
 async def log_in(info_login: UserLogin):
     info_login = info_login.dict()
@@ -683,15 +685,37 @@ async def log_in(info_login: UserLogin):
         "password":sh.hash(info_login["password"]),
         "token":sh.hash(info_login['token']),
         "gender": doc["rows"][0]["value"]["gender"],
-        
+        "role":doc['rows'][0]["value"]["role"]
+    }
+    payload_company = {
+        "e_mail":info_login['e_mail'],
+        "password":sh.hash(info_login["password"]),
+        "token":sh.hash(info_login['token']),
+        "role":doc['rows'][0]["value"]["role"]
+    }
+    payload_admin = {
+        "e_mail":info_login['e_mail'],
+        "password":sh.hash(info_login["password"]),
+        "token":sh.hash(info_login['token']),
+        "role":doc['rows'][0]["value"]["role"]
     }
     database = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/sessions')
-    if info_login['e_mail'] in document and sh.verify(info_login['password'], doc['rows'][0]['value']):
+    #ajout de ['password'] ?? paraissait moins logique sans, à vérifier 
+    # l'envoi direct du mot de passe sans le hasher et vérifier coté serveur la concordence avec le hash est inutile. Coté serveur on ne recoit JAMAIS le vrai mot de passe. Il est envoyé hashé et on compare uniquement les hashs. Donc à rétablir. L'ajout de la condition sur le hash récu coté client est à faire.
+    if info_login['e_mail'] in document and sh.verify(info_login['password'], doc['rows'][0]['value']['password']) and doc['rows'][0]["value"]["role"] == "consumer":
         database.save(payload)
-        return {"User":"exists"}
+        output = {"User":"exists", "role":"consumer"}
+        return output
+    elif info_login['e_mail'] in document and sh.verify(info_login['password'], doc['rows'][0]['value']["password"]) and doc['rows'][0]["value"]["role"] == "company":
+        database.save(payload_company)
+        output_ = {"User":"exists", "role":"company"}
+        return output_
+    elif info_login['e_mail'] in document and sh.verify(info_login['password'], doc['rows'][0]['value']['password']) and doc['rows'][0]["value"]["role"] == "admin":
+        database.save(payload_admin)
+        output__ = {"User":"exists", "role":"admin"}
     else:
         import time
-        time.sleep(7)
+        time.sleep(7) #on sleep pour éviter les brute force ou en tout cas les allonger 
         return {"Status":"Not done"}
 
 @api.post("/add-admin")
@@ -729,14 +753,17 @@ async def add_admin(admin :AdminRegister):
             return False
     date_info = requests.get("https://www.timeapi.io/api/TimeZone/zone?timeZone=Europe/Amsterdam")
     informations = {
+        "role":"company",
         "company_demand_id":str(uuid.uuid4()),
         "email":admin["email"],
         "domain":admin["domain"],
         "description":admin["description"],
-        "hour":date_info["currentLocalTime"]
+        "hour":date_info["currentLocalTime"],
+        "password":admin['password'],
     }
     #exigences d'une description complète, + de 50 caractères
-    if len(description) > 50 and check_mx_records_server(domain) and check_server_mx_records(check_mx_records_server(domain)):
+    # + verif identifiant et mot de passe de celui qui l'ajoute.
+    if len(description) > 50 and check_mx_records_server(domain) and check_server_mx_records(check_mx_records_server(domain)) and sh.hash(admin['password_']) == module.super_mdp_admin:
         database_admin = couchdb.Database(f'http://{module.username}:{module.password}@127.0.0.1:5984/demande_admin')
         database_admin.save(informations)
     else:
@@ -748,10 +775,13 @@ async def add_admin(admin :AdminRegister):
 async def return_demands():
     pass
 
+@api.post('/demands')
+async def demands():
+    pass
+
 @api.get("/test", tags=['Old endpoint'])
 def return_test():
     return {"test":'passed'}
-
 
 
 if __name__ == '__main__':
